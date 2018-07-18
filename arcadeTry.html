@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+    canvas {
+        border:1px solid #d3d3d3;
+        background-color: #f1f1f1;
+    }
+</style>
+</head>
+<body onload="startGame()">
+    <script>
+        let leftObstacles = [];
+        let rightObstacles = [];
+
+        function startGame() {
+            myGamePiece = new component(25,25,"red",210,440);
+            myGameArea.start();
+            finishLine = new component(480, 50, "blue",0,0);
+        }
+
+        const myGameArea = {
+            canvas : document.createElement('canvas'),
+            start : function(){
+                this.canvas.width = 480;
+                this.canvas.height = 480;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.frameNo = 0;
+                this.interval = setInterval(updateGameArea, 20);
+                //set Event listeners for controllers:
+                window.addEventListener('keydown',function(e){
+                    myGameArea.keys = (myGameArea.keys || []);
+                    myGameArea.keys[e.keyCode] = true;
+                })
+                window.addEventListener('keyup', function(e){
+                    myGameArea.keys[e.keyCode] = false;
+                })
+            },
+
+            clear : function(){
+                this.context.clearRect(0,0, this.canvas.width,this.canvas.height);
+            }
+
+        }
+
+        function component(width, height, color, x, y){
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.x = x;
+            this.y = y;
+            this.speedX = 0;
+            this.speedY = 0;
+
+            this.update = function(){
+                ctx = myGameArea.context;
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+
+            this.newPos = function(){
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            this.offscreen = function(){
+                if(this.x < -this.width){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
+        }
+
+        function everyInterval(n){
+            if((myGameArea.frameNo / n) % 1 == 0){return true;}
+            return false;
+        }
+
+
+        function updateGameArea(){
+            myGameArea.clear();
+            finishLine.update();
+            myGamePiece.newPos();
+            myGamePiece.update();
+            myGameArea.frameNo += 1;
+            // create obstacles
+            if (myGameArea.frameNo == 1 || everyInterval(70)){
+                start = myGameArea.canvas.height-180;
+                end = myGameArea.canvas.height-400;
+                x = myGameArea.canvas.width;
+                y = Math.floor((Math.random() * start)+end);
+                y1 = Math.floor((Math.random() * start)+end);
+                // make sure obstacles don't have same y value
+                leftObstacles.push(new component(50,10, "green",x, y));
+                rightObstacles.push(new component(50,10, "green",-50,y1));
+            }
+            //make them appear
+            for (i = 0; i < leftObstacles.length; i++) {
+                leftObstacles[i].x += -1;
+                leftObstacles[i].update();
+               // delete obstacles that go offscreeen so our array doesn't get crazy long
+               if(leftObstacles[i].offscreen()){
+                     leftObstacles.splice(i,1);
+                } 
+            }
+
+            for (i = 0; i < rightObstacles.length; i++) {
+                rightObstacles[i].x += +1;
+                rightObstacles[i].update();
+               // delete obstacles that go offscreeen so our array doesn't get crazy long
+               if(rightObstacles[i].offscreen()){
+                     rightObstacles.splice(i,1);
+                }
+                
+            }
+            // initial speed
+            myGamePiece.speedX = 0;
+            myGamePiece.speedY = 0; 
+            // game controls
+            if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.speedX = -2; }
+            if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.speedX = 2; }
+            if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speedY = -2; }
+            if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speedY = 2; }
+            // no out of bounds
+            if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+                myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
+            }
+            if(myGamePiece.x > (myGameArea.canvas.width - myGamePiece.width)){
+                myGamePiece.x = (myGameArea.canvas.width - myGamePiece.width);
+            }
+            if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
+                myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
+            }
+
+        }        
+
+    </script>
+
+</body>
+</html>
