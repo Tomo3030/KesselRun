@@ -18,7 +18,9 @@
         function startGame() {
             myGameArea.start();
             myGamePiece = new component(25,25,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
-            finishLine = new component(myGameArea.canvas.width, 50, "blue",0,0);
+            finishBorder = new component(myGameArea.canvas.width, 50, "blue",0,0);
+            //the finish line is what the gamePiece must actually crashWith() in order to win.
+            finishline = new component(myGameArea.canvas.width,15,"transparent",0,0);
         }
 
         const myGameArea = {
@@ -42,6 +44,10 @@
 
             clear : function(){
                 this.context.clearRect(0,0, this.canvas.width,this.canvas.height);
+            },
+
+            stop : function(){
+                clearInterval(this.interval);
             }
 
         }
@@ -82,11 +88,12 @@
 
 
         this.crashWith = function(obstacle){
-            let front = this.y;
-            let back = this.y + (this.height);
-            let left = this.x;
-            let right = this.x + (this.width);
-
+            //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
+            // the game piece by half its own height or width.
+            let front = (this.y) - (this.height/2.3);
+            let back = this.y + (this.height/2.3);
+            let left = this.x - (this.height/2.3);
+            let right = this.x + (this.width/2.3);
             let obstacleFront = obstacle.y;
             let obstacleBack = obstacle.y + (obstacle.height);
             let obstacleLeft = obstacle.x;
@@ -94,7 +101,9 @@
             
             let crash = false;
 
-            if((front < obstacleBack) && (left < obstacleRight) && right > obstacleLeft){crash = true;}
+            if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
+                crash = true;
+            }
             return crash; 
         }
 
@@ -104,6 +113,11 @@
             } else {
                 return false;
             }
+        }
+
+        this.explode = function(){
+            
+
         }
     }
 
@@ -115,7 +129,8 @@
 
     function updateGameArea(){
         myGameArea.clear();
-        finishLine.update();
+        finishBorder.update();
+        finishline.update();
         myGamePiece.newPos();
         myGamePiece.updateTurn();
         myGamePiece.moveAngle = 0;
@@ -157,19 +172,35 @@
                    obstacles.splice(i,1);
                } 
            }
-            for(let i = 0; i < obstacles.length; i++) {
-                    if(myGamePiece.crashWith(obstacles[i])){
-                        console.log('yep');
-                    }
-                }
+           for(let i = 0; i < obstacles.length; i++) {
+            if(myGamePiece.crashWith(obstacles[i])){
+                myGamePiece.color = "pink";
+                myGamePiece.width = 5;
+                myGamePiece.height = 5;
+                myGamePiece.updateTurn();
+                console.log(myGamePiece.color);
+                myGameArea.stop();
 
-            // initial speed
-            myGamePiece.speed = 0;
+            }
+
+            //win the game
+            if(myGamePiece.crashWith(finishline)){
+                console.log("win!");
+                myGamePiece.speed = 0;
+                myGamePiece.moveAngle = -2;
+            }
+            else{
+               myGamePiece.speed = 0;
             // game controls
             if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -2; }
             if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 2; }
             if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
             if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed = -1; }
+        }
+    }
+
+            // initial speed
+
             // no out of bounds
             if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
                 myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
@@ -179,6 +210,10 @@
             }
             if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
                 myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
+            }
+
+            if(myGamePiece.y < finishline.height){
+                myGamePiece.y = (finishline.height);
             }
         }        
 
