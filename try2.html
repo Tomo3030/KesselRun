@@ -74,16 +74,16 @@
 
         
         this.updateTurn = function(){
-         ctx = myGameArea.context;
-         ctx.save();
-         ctx.translate(this.x, this.y);
-         ctx.rotate(this.angle);
-         ctx.fillStyle = color;
-         ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-         ctx.restore();  
-     }
+           ctx = myGameArea.context;
+           ctx.save();
+           ctx.translate(this.x, this.y);
+           ctx.rotate(this.angle);
+           ctx.fillStyle = color;
+           ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+           ctx.restore();  
+       }
 
-     this.newPos = function() {
+       this.newPos = function() {
         this.angle += this.moveAngle * Math.PI / 180;
         this.x += this.speed * Math.sin(this.angle);
         this.y -= this.speed * Math.cos(this.angle);
@@ -128,7 +128,7 @@
     }
 
     this.offscreen = function(){
-        if(this.x < -this.width){
+        if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
             return true;
         } else {
             return false;
@@ -172,6 +172,8 @@ function updateGameArea(){
                 switcher = true; 
             }
 
+            //console.log(obstacles.length);
+
         }  
         //make them appear and move
         for (let i = 0; i < obstacles.length; i++) {
@@ -185,18 +187,18 @@ function updateGameArea(){
             }
            // delete obstacles that go offscreeen so our array doesn't get crazy long
            if(obstacles[i].offscreen()){
-               obstacles.splice(i,1);
-           } 
-       }
-       for(let i = 0; i < obstacles.length; i++) {
+             obstacles.splice(i,1);
+         } 
+     }
+     for(let i = 0; i < obstacles.length; i++) {
         if(myGamePiece.crashWith(obstacles[i])){
             //myGameArea.clear();
             myGamePiece.width = 0;
             myGamePiece.height = 0;
             updateGameArea();
             if(!explode){
-            myGamePiece.makeParticles(myGamePiece.x,myGamePiece.y);
-            console.log('inited');}
+                myGamePiece.makeParticles(myGamePiece.x,myGamePiece.y);
+            }
         }
 
 
@@ -204,8 +206,10 @@ function updateGameArea(){
             for (var j = 0; j < particles.length; j++) {
                 particles[j].newPos();
                 particles[j].updateTurn();
+                if(particles[j].offscreen()){
+                    particles.splice(j,1);
+                }
             }
-
         }
 
         //win the game
@@ -214,7 +218,7 @@ function updateGameArea(){
             myGamePiece.moveAngle = -2;
         }
         else{
-           myGamePiece.speed = 0;
+         myGamePiece.speed = 0;
         // game controls
         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -2; }
         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 2; }
