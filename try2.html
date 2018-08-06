@@ -11,213 +11,237 @@
 </head>
 <body onload="startGame()">
     <script>
+
         let obstacles = [];
+        let particles = [];
         let switcher;
+        let explode = false;
+        let particleAngle = 0;
 
 
         function startGame() {
             myGameArea.start();
             myGamePiece = new component(25,25,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
             finishBorder = new component(myGameArea.canvas.width, 50, "blue",0,0);
-            //the finish line is what the gamePiece must actually crashWith() in order to win.
-            finishline = new component(myGameArea.canvas.width,15,"transparent",0,0);
+        //the finish line is what the gamePiece must actually crashWith() in order to win.
+        finishline = new component(myGameArea.canvas.width,20,"transparent",0,0);
+    }
+
+    const myGameArea = {
+        canvas : document.createElement('canvas'),
+        start : function(){
+            this.canvas.width = 480;
+            this.canvas.height = 720;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+            this.interval = setInterval(updateGameArea, 20);
+            //set Event listeners for controllers:
+            window.addEventListener('keydown',function(e){
+                myGameArea.keys = (myGameArea.keys || []);
+                myGameArea.keys[e.keyCode] = true;
+            })
+            window.addEventListener('keyup', function(e){
+                myGameArea.keys[e.keyCode] = false;
+            })
+        },
+
+        clear : function(){
+            this.context.clearRect(0,0, this.canvas.width,this.canvas.height);
+        },
+
+        stop : function(){
+            clearInterval(this.interval);
         }
 
-        const myGameArea = {
-            canvas : document.createElement('canvas'),
-            start : function(){
-                this.canvas.width = 480;
-                this.canvas.height = 720;
-                this.context = this.canvas.getContext("2d");
-                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-                this.frameNo = 0;
-                this.interval = setInterval(updateGameArea, 20);
-                //set Event listeners for controllers:
-                window.addEventListener('keydown',function(e){
-                    myGameArea.keys = (myGameArea.keys || []);
-                    myGameArea.keys[e.keyCode] = true;
-                })
-                window.addEventListener('keyup', function(e){
-                    myGameArea.keys[e.keyCode] = false;
-                })
-            },
+    }
 
-            clear : function(){
-                this.context.clearRect(0,0, this.canvas.width,this.canvas.height);
-            },
-
-            stop : function(){
-                clearInterval(this.interval);
-            }
-
+    function component(width, height, color, x, y){
+        this.width = width;
+        this.height = height;
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.angle = 0;
+        this.moveAngle = 0;
+        this.speed = 0;
+        
+        this.update = function(){
+            ctx = myGameArea.context;
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height)
         }
 
-        function component(width, height, color, x, y){
-            this.width = width;
-            this.height = height;
-            this.color = color;
-            this.x = x;
-            this.y = y;
-            this.angle = 0;
-            this.moveAngle = 0;
-            this.speed = 0;
-            
-            this.update = function(){
-                ctx = myGameArea.context;
-                ctx.fillStyle = color;
-                ctx.fillRect(this.x, this.y, this.width, this.height)
-            }
+        
+        this.updateTurn = function(){
+         ctx = myGameArea.context;
+         ctx.save();
+         ctx.translate(this.x, this.y);
+         ctx.rotate(this.angle);
+         ctx.fillStyle = color;
+         ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+         ctx.restore();  
+     }
 
-            
-            this.updateTurn = function(){
-             ctx = myGameArea.context;
-             ctx.save();
-             ctx.translate(this.x, this.y);
-             ctx.rotate(this.angle);
-             ctx.fillStyle = color;
-             ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-             ctx.restore();  
-         }
+     this.newPos = function() {
+        this.angle += this.moveAngle * Math.PI / 180;
+        this.x += this.speed * Math.sin(this.angle);
+        this.y -= this.speed * Math.cos(this.angle);
+    }
 
-         this.newPos = function() {
-            this.angle += this.moveAngle * Math.PI / 180;
-            this.x += this.speed * Math.sin(this.angle);
-            this.y -= this.speed * Math.cos(this.angle);
+    //in this function need to put an x,y which will be the x,y of the particles. 
+    this.makeParticles = function(x,y){
+        const numberOfParticles = 20;
+        for (var i = 0; i < numberOfParticles; i++) {
+            particles.push(new component(5,5,"white",x,y));
         }
 
-
-
-        this.crashWith = function(obstacle){
-            //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
-            // the game piece by half its own height or width.
-            let front = (this.y) - (this.height/2.3);
-            let back = this.y + (this.height/2.3);
-            let left = this.x - (this.height/2.3);
-            let right = this.x + (this.width/2.3);
-            let obstacleFront = obstacle.y;
-            let obstacleBack = obstacle.y + (obstacle.height);
-            let obstacleLeft = obstacle.x;
-            let obstacleRight = obstacle.x + (obstacle.width);
-            
-            let crash = false;
-
-            if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
-                crash = true;
-            }
-            return crash; 
+        for (var i = 0; i < particles.length; i++) {
+            particleAngle += 1;
+            particles[i].speed = 1;
+            particles[i].angle = particleAngle;
+            //console.log(particles[i].angle);
+            //console.log(particles[i].speed); 
         }
+        explode = true;
+    }
 
-        this.offscreen = function(){
-            if(this.x < -this.width){
-                return true;
+
+    this.crashWith = function(obstacle){
+        //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
+        // the game piece by half its own height or width.
+        let front = (this.y) - (this.height/2.3);
+        let back = this.y + (this.height/2.3);
+        let left = this.x - (this.height/2.3);
+        let right = this.x + (this.width/2.3);
+        let obstacleFront = obstacle.y;
+        let obstacleBack = obstacle.y + (obstacle.height);
+        let obstacleLeft = obstacle.x;
+        let obstacleRight = obstacle.x + (obstacle.width);
+        
+        let crash = false;
+
+        if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
+            crash = true;
+        }
+        return crash; 
+    }
+
+    this.offscreen = function(){
+        if(this.x < -this.width){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+}
+
+function everyInterval(n){
+    if((myGameArea.frameNo / n) % 1 == 0){return true;}
+    return false;
+}
+
+
+function updateGameArea(){
+    myGameArea.clear();
+    finishBorder.update();
+    finishline.update();
+    myGamePiece.newPos();
+    myGamePiece.updateTurn();
+    myGamePiece.moveAngle = 0;
+    myGameArea.frameNo += 1;
+        // create obstacles
+        if (myGameArea.frameNo == 1 || everyInterval(30)){
+            end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
+            start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
+            x = myGameArea.canvas.width;
+            y = Math.floor((Math.random() * end) + start);
+            // // make sure obstacles don't crowd one another
+            // for (var i = 0; i < obstacles.length; i++) {
+            //     while(obstacles[i].y > y && (obstacles[i].y + obstacles[i].width) < y){
+            //         y = Math.floor((Math.random() * end) + start);
+            //         console.log(y);
+            //     }
+            // }
+            if(switcher){
+                obstacles.push(new component(50,10,"green",x,y));
+                switcher = false;
             } else {
-                return false;
+                obstacles.push(new component(50,10,"pink", -20,y));
+                switcher = true; 
             }
+
+        }  
+        //make them appear and move
+        for (let i = 0; i < obstacles.length; i++) {
+            if(obstacles[i].color == "pink"){
+                obstacles[i].x += 1;
+                obstacles[i].update();
+            } else{
+                obstacles[i].x += -1;
+                obstacles[i].update();
+
+            }
+           // delete obstacles that go offscreeen so our array doesn't get crazy long
+           if(obstacles[i].offscreen()){
+               obstacles.splice(i,1);
+           } 
+       }
+       for(let i = 0; i < obstacles.length; i++) {
+        if(myGamePiece.crashWith(obstacles[i])){
+            //myGameArea.clear();
+            myGamePiece.width = 0;
+            myGamePiece.height = 0;
+            updateGameArea();
+            if(!explode){
+            myGamePiece.makeParticles(myGamePiece.x,myGamePiece.y);
+            console.log('inited');}
         }
 
-        this.explode = function(){
-            
+
+        if(explode){
+            for (var j = 0; j < particles.length; j++) {
+                particles[j].newPos();
+                particles[j].updateTurn();
+            }
 
         }
-    }
 
-    function everyInterval(n){
-        if((myGameArea.frameNo / n) % 1 == 0){return true;}
-        return false;
-    }
-
-
-    function updateGameArea(){
-        myGameArea.clear();
-        finishBorder.update();
-        finishline.update();
-        myGamePiece.newPos();
-        myGamePiece.updateTurn();
-        myGamePiece.moveAngle = 0;
-        myGameArea.frameNo += 1;
-            // create obstacles
-            if (myGameArea.frameNo == 1 || everyInterval(30)){
-                end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
-                start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
-                x = myGameArea.canvas.width;
-                y = Math.floor((Math.random() * end) + start);
-                // // make sure obstacles don't crowd one another
-                // for (var i = 0; i < obstacles.length; i++) {
-                //     while(obstacles[i].y > y && (obstacles[i].y + obstacles[i].width) < y){
-                //         y = Math.floor((Math.random() * end) + start);
-                //         console.log(y);
-                //     }
-                // }
-                if(switcher){
-                    obstacles.push(new component(50,10,"green",x,y));
-                    switcher = false;
-                } else {
-                    obstacles.push(new component(50,10,"pink", -20,y));
-                    switcher = true; 
-                }
-
-            }
-            //make them appear and move
-            for (i = 0; i < obstacles.length; i++) {
-                if(obstacles[i].color == "pink"){
-                    obstacles[i].x += 1;
-                    obstacles[i].update();
-                } else{
-                    obstacles[i].x += -1;
-                    obstacles[i].update();
-
-                }
-               // delete obstacles that go offscreeen so our array doesn't get crazy long
-               if(obstacles[i].offscreen()){
-                   obstacles.splice(i,1);
-               } 
-           }
-           for(let i = 0; i < obstacles.length; i++) {
-            if(myGamePiece.crashWith(obstacles[i])){
-                myGamePiece.color = "pink";
-                myGamePiece.width = 5;
-                myGamePiece.height = 5;
-                myGamePiece.updateTurn();
-                console.log(myGamePiece.color);
-                myGameArea.stop();
-
-            }
-
-            //win the game
-            if(myGamePiece.crashWith(finishline)){
-                console.log("win!");
-                myGamePiece.speed = 0;
-                myGamePiece.moveAngle = -2;
-            }
-            else{
-               myGamePiece.speed = 0;
-            // game controls
-            if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -2; }
-            if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 2; }
-            if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
-            if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed = -1; }
+        //win the game
+        if(myGamePiece.crashWith(finishline)){
+            myGamePiece.speed = 0;
+            myGamePiece.moveAngle = -2;
         }
+        else{
+           myGamePiece.speed = 0;
+        // game controls
+        if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -2; }
+        if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 2; }
+        if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
+        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed = -1; }
     }
+}
 
-            // initial speed
+        // initial speed
 
-            // no out of bounds
-            if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
-                myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
-            }
-            if(myGamePiece.x > (myGameArea.canvas.width - myGamePiece.width)){
-                myGamePiece.x = (myGameArea.canvas.width - myGamePiece.width);
-            }
-            if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
-                myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
-            }
+        // no out of bounds
+        if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+            myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
+        }
+        if(myGamePiece.x > (myGameArea.canvas.width - myGamePiece.width)){
+            myGamePiece.x = (myGameArea.canvas.width - myGamePiece.width);
+        }
+        if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
+            myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
+        }
 
-            if(myGamePiece.y < finishline.height){
-                myGamePiece.y = (finishline.height);
-            }
-        }        
+        if(myGamePiece.y < finishline.height){
+            myGamePiece.y = (finishline.height);
+        }
+    }        
 
-    </script>
+</script>
 
 </body>
 </html>
