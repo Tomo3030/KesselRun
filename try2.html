@@ -17,20 +17,21 @@
         let switcher;
         let explode = false;
         let particleAngle = 0;
+        
 
 
         function startGame() {
             myGameArea.start();
-            myGamePiece = new component(25,25,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
+            myGamePiece = new component(15,15,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
             finishBorder = new component(myGameArea.canvas.width, 50, "blue",0,0);
-        //the finish line is what the gamePiece must actually crashWith() in order to win.
-        finishline = new component(myGameArea.canvas.width,20,"transparent",0,0);
-    }
+            //the finish line is what the gamePiece must actually crashWith() in order to win.
+            finishline = new component(myGameArea.canvas.width,16,"transparent",0,0);
+        }
 
     const myGameArea = {
         canvas : document.createElement('canvas'),
         start : function(){
-            this.canvas.width = 480;
+            this.canvas.width = 540;
             this.canvas.height = 720;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -218,12 +219,14 @@ function updateGameArea(){
             myGamePiece.moveAngle = -2;
         }
         else{
-         myGamePiece.speed = 0;
+         myGamePiece.speed += .0001;
+         myGamePiece.moveAngle += .005;
+         console.log("speed: " + myGamePiece.speed);
         // game controls
         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -2; }
         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 2; }
         if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
-        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed = -1; }
+        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
     }
 }
 
