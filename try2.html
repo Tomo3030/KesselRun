@@ -13,89 +13,146 @@
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <script type="text/javascript" src="objects.js"></script>
     <script>
-
         let obstacles = [];
         let particles = [];
-        let switcher;
-        let explode = false;
-        let particleAngle = 0;
-        let score;
         let gameOn = true;
-        
+
+
+
         function startGame() {
             myGameArea.start();
-            myGamePiece = new component(15,15,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
+            myGamePiece = new component(15,15,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "turn");
             finishBorder = new component(myGameArea.canvas.width, 70, "blue",0,0);
             //the finish line is what the gamePiece must actually crashWith() in order to win.
             finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
             score = new component("30px","Orbitron","white",15,30,"text");
         }
 
-
+        //myGameArea.start uses this function to decide the update interval.
         function everyInterval(n){
             if((myGameArea.frameNo / n) % 1 == 0){return true;}
             return false;
         }
 
+        //myGameArea.start calls this function every interval, as seen above.
         function updateGameArea(){
             myGameArea.clear();
             finishBorder.update();
             finishline.update();
             myGamePiece.newPos();
-            myGamePiece.updateTurn();
+            myGamePiece.update();
             myGamePiece.moveAngle = 0;
             myGameArea.frameNo += 1;
-            if(gameOn){score.text = "SPEED: " + (Math.round(myGamePiece.speed * 1000,0));}
+            score.text = "SPEED: " + (Math.round(myGamePiece.speed * 1000,0));
             score.update();
 
-        //obstacles 
-        if (myGameArea.frameNo == 1 || everyInterval(30)){
-            end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
-            start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
-            x = myGameArea.canvas.width;
-            y = Math.floor((Math.random() * end) + start);
-            
-            if(switcher){
-                obstacles.push(new component(50,10,"green",x,y));
-                switcher = false;
-            } else {
-                obstacles.push(new component(50,10,"pink", -20,y));
-                switcher = true; 
-            }
-        }  
-        //make them appear and move
-        for (let i = 0; i < obstacles.length; i++) {
-            if(obstacles[i].color == "pink"){
-                obstacles[i].x += 1;
-                obstacles[i].update();
-            } else{
-                obstacles[i].x += -1;
-                obstacles[i].update();
+            //displays instructions untill a key is hit
+            displayInstructions();
 
-            }
-           // delete obstacles that go offscreeen so our array doesn't get crazy long
-           if(obstacles[i].offscreen()){
-             obstacles.splice(i,1);
-         } 
-     }
-     for(let i = 0; i < obstacles.length; i++) {
-        if((gameOn) && myGamePiece.crashWith(obstacles[i])){
-            //myGameArea.clear();
-            myGamePiece.width = 0;
-            myGamePiece.height = 0;
-            myGamePiece.speed = 0;
-            //score.text = "SPEED: " + (Math.round(myGamePiece.speed * 1000,0));
-            gameOn = !gameOn;
-            if(!explode){
-                myGamePiece.makeParticles(myGamePiece.x,myGamePiece.y);
+            //makes obstacles and orients them 
+            displayObstacles();
+
+            //moves obscatacles across screen and destroys obstacles offscreen
+            moveAndDestroyObstacles();
+
+            //check if gamepiece crashed with obstacles, and if it has create explosion.
+            checkCrash();
+
+            //check if gamepiece has passed the finished line, and if it has create score.
+            checkWin();
+
+            //check for key stroke. To control the game. 
+            checkKeyStroke();
+
+            //make sure gamepiece doesn't go outside of canvas
+            noOutOfBounds();
+        }
+        
+
+        function displayInstructions(){
+            if(myGameArea.keys == null){
+                startText = new component("38px", "Orbitron", "fff", 8, myGameArea.canvas.height/3,"text");
+                startText.text = "Press Up Arrow To Start";
+                startText.update();
             }
         }
 
+        let displayObstacles = (function(){
+            let obstacleOrginSide;
+            return function(){
+                //obstacles 
+                if (myGameArea.frameNo == 1 || everyInterval(30)){
+                    end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
+                    start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
+                    x = myGameArea.canvas.width;
+                    y = Math.floor((Math.random() * end) + start);
 
-        if(explode){
+                    if(obstacleOrginSide){
+                        obstacles.push(new component(50,10,"green",x,y));
+                        obstacleOrginSide = !obstacleOrginSide;
+                    } else {
+                        obstacles.push(new component(50,10,"pink", -20,y));
+                        obstacleOrginSide = !obstacleOrginSide; 
+                    }
+                }
+
+
+            };
+        })();
+
+        function moveAndDestroyObstacles(){
+            //make them appear and move
+            for (let i = 0; i < obstacles.length; i++) {
+                if(obstacles[i].color == "pink"){
+                    obstacles[i].x += 1;
+                    obstacles[i].update();
+                } else{
+                    obstacles[i].x += -1;
+                    obstacles[i].update();
+
+                }
+                // delete obstacles that go offscreeen so our array doesn't get crazy long
+                if(obstacles[i].offscreen()){
+                    obstacles.splice(i,1);
+                } 
+            }
+        }
+
+        function checkCrash(){
+            for(let i = 0; i < obstacles.length; i++) {
+                if((gameOn) && myGamePiece.crashWith(obstacles[i])){
+                    //myGameArea.clear();
+                    myGamePiece.width = 0;
+                    myGamePiece.height = 0;
+                    myGamePiece.speed = 0;
+                    gameOn = !gameOn;
+                    makeParticles(myGamePiece.x,myGamePiece.y);   
+                }
+                explosion();
+            }
+
+            
+        }
+        makeParticles = function(x,y){
+            const numberOfParticles = 35;
+            let particleAngle = 0;
+
+            for (var i = 0; i < numberOfParticles; i++) {
+                particles.push(new component(5,5,"#fff",x,y,"explosion"));
+            }
+
+            for (var i = 0; i < particles.length; i++) {
+                particleAngle += 1;
+                particles[i].speed = Math.floor((Math.random()* 2) + 1);
+                particles[i].angle = particleAngle;
+            }  
+        }
+
+        function explosion(){
             for (var j = 0; j < particles.length; j++) {
+                alpha = ((j-5) * 5)/(-100);
                 particles[j].newPos();
-                particles[j].updateTurn();
+                particles[j].update(alpha);
                 if(particles[j].offscreen()){
                     particles.splice(j,1);
                 }
@@ -103,59 +160,63 @@
         }
 
         function calculateMultiplyer(multiplyer){
-            return((multiplyer * 2)/(myGameArea.canvas.width/2)).toFixed(2);
+            return((multiplyer * 2)/(myGameArea.canvas.width/2)).toFixed(2);  
         }
 
-        //win the game
-        if((gameOn) && myGamePiece.crashWith(finishline)){
-            let multiplyer;
-            if(myGamePiece.x > 270){
-                multiplyer = (myGamePiece.x - 540) * -1;
-            } else {
-                multiplyer = myGamePiece.x;
+        function checkWin(){
+            if(myGamePiece.crashWith(finishline)){
+                // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
+                let multiplyer; 
+                if(myGamePiece.x > (myGameArea.canvas.width/2)){
+                    multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
+                } else {
+                    multiplyer = myGamePiece.x;
+                }
+                myGameArea.stop();
+                displaySpeed = new component("38px", "Orbitron", "white", 8, 120,"text");
+                displaySpeed.text = "SPEED: " + (myGamePiece.speed * 1000).toFixed(0);
+                displaySpeed.update();
+                displayMultiplyer = new component("38px", "Orbitron", "white", 8, 170 ,"text");
+                displayMultiplyer.text = "MULTIPLYER: " + calculateMultiplyer(multiplyer);
+                displayMultiplyer.update();
+                displayTotal = new component("38px", "Orbitron", "white", 8, 220 ,"text");
+                displayTotal.text = "TOTAL SCORE: " + (calculateMultiplyer(multiplyer) * myGamePiece.speed*1000).toFixed(0);
+                displayTotal.update();
+                myGamePiece.speed = 0;
+                gameOn = !gameOn;
             }
-            console.log((calculateMultiplyer(multiplyer) * myGamePiece.speed*1000).toFixed(0));
-            
-
-            score.text = "SPEED: " + (myGamePiece.speed * 1000).toFixed(0);
-            myGamePiece.speed = 0;
-            gameOn = !gameOn;
-        }
-        
-        if(gameOn){
-         myGamePiece.speed += .0001;
-        // game controls
-        if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -myGamePiece.speed; }
-        if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = myGamePiece.speed; }
-        if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
-        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
-    }
-}
-
-
-        // no out of bounds
-        if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
-            myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
-        }
-        if(myGamePiece.x > (myGameArea.canvas.width - myGamePiece.width)){
-            myGamePiece.x = (myGameArea.canvas.width - myGamePiece.width);
-        }
-        if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
-            myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
         }
 
-        if(myGamePiece.y < finishline.height){
-            myGamePiece.y = (finishline.height);
+        function checkKeyStroke(){
+            if(gameOn){
+                myGamePiece.speed += .001;
+                // game controls
+                if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -myGamePiece.speed; }
+                if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = myGamePiece.speed; }
+                if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
+                if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
+            }
         }
-    }
-    //title 
-    // monofett
-    // faster one
 
-    // orbitron 
-    // wallpoet        
+        function noOutOfBounds(){
+             if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+                myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
+                myGamePiece.speed -= .002;
+            }
+            if(myGamePiece.x > (myGameArea.canvas.width - myGamePiece.width)){
+                myGamePiece.x = (myGameArea.canvas.width - myGamePiece.width);
+                myGamePiece.speed -= .002;
+            }
+            if(myGamePiece.y > (myGameArea.canvas.height- myGamePiece.height)){
+                myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
+                myGamePiece.speed -= .002;
+            }
+            if(myGamePiece.y < finishline.height){
+                myGamePiece.y = (finishline.height);
+            }
+        }
 
-</script>
+    </script>
 
 </body>
 </html>

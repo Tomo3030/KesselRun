@@ -24,9 +24,7 @@
         stop : function(){
             clearInterval(this.interval);
         }
-
     }
-
 
     function component(width, height, color, x, y, type){
         this.type = type;
@@ -38,80 +36,63 @@
         this.angle = 0;
         this.moveAngle = 0;
         this.speed = 0;
+
         
-        this.update = function(){
+        this.update = function(alpha){
             ctx = myGameArea.context;
+            ctx.fillStyle = color;
             if(this.type == 'text'){
                 ctx.font = this.width + " " + this.height;
-                ctx.fillStyle = color;
                 ctx.fillText(this.text, this.x, this.y);
-            } else {
-                ctx.fillStyle = color;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+            } else if(this.type == 'turn'){
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+                ctx.restore();
+            } else if(this.type == 'explosion'){
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.globalAlpha = alpha;
+                ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+                ctx.restore();
+            }
+            else {
+                ctx.fillRect(this.x, this.y, this.width, this.height)
             }
         }
 
-
-            this.updateTurn = function(){
-             ctx = myGameArea.context;
-             ctx.save();
-             ctx.translate(this.x, this.y);
-             ctx.rotate(this.angle);
-             ctx.fillStyle = color;
-             ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-             ctx.restore();  
-         }
-
-         this.newPos = function() {
+        this.newPos = function() {
             this.angle += this.moveAngle * Math.PI / 180;
             this.x += this.speed * Math.sin(this.angle);
             this.y -= this.speed * Math.cos(this.angle);
         }
 
-    //in this function need to put an x,y which will be the x,y of the particles. 
-    this.makeParticles = function(x,y){
-        const numberOfParticles = 20;
-        for (var i = 0; i < numberOfParticles; i++) {
-            particles.push(new component(5,5,"white",x,y));
+        this.crashWith = function(obstacle){
+            //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
+            // the game piece by half its own height or width.
+            let front = (this.y) - (this.height/2.3);
+            let back = this.y + (this.height/2.3);
+            let left = this.x - (this.height/2.3);
+            let right = this.x + (this.width/2.3);
+            let obstacleFront = obstacle.y;
+            let obstacleBack = obstacle.y + (obstacle.height);
+            let obstacleLeft = obstacle.x;
+            let obstacleRight = obstacle.x + (obstacle.width);
+            let crash = false;
+
+            if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
+                crash = true;
+            }
+            return crash; 
         }
 
-        for (var i = 0; i < particles.length; i++) {
-            particleAngle += 1;
-            particles[i].speed = 1;
-            particles[i].angle = particleAngle;
-            //console.log(particles[i].angle);
-            //console.log(particles[i].speed); 
-        }
-        explode = true;
-    }
-
-
-    this.crashWith = function(obstacle){
-        //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
-        // the game piece by half its own height or width.
-        let front = (this.y) - (this.height/2.3);
-        let back = this.y + (this.height/2.3);
-        let left = this.x - (this.height/2.3);
-        let right = this.x + (this.width/2.3);
-        let obstacleFront = obstacle.y;
-        let obstacleBack = obstacle.y + (obstacle.height);
-        let obstacleLeft = obstacle.x;
-        let obstacleRight = obstacle.x + (obstacle.width);
-        
-        let crash = false;
-
-        if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
-            crash = true;
-        }
-        return crash; 
-    }
-
-    this.offscreen = function(){
-        if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
-            return true;
-        } else {
-            return false;
+        this.offscreen = function(){
+            if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
+                return true;
+            } else {
+                return false;
+            }
         }
     }
-
-}
