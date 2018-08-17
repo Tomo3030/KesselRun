@@ -72,7 +72,18 @@
                 ctx.rotate(this.angle);
                 ctx.drawImage(this.image,this.cropPosX,this.cropPosY,28,36, this.width / -2, this.height / -2, this.width, this.height);
                 ctx.restore();
-            } 
+            } else if(this.type == 'gradient'){
+                let grd = ctx.createRadialGradient(this.width/2,0,10,this.width/2,0,250);
+                grd.addColorStop(0, "darkgray");
+                grd.addColorStop(.5, "white");
+                grd.addColorStop(1,"black");
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.scale(1,.3);
+                ctx.fillStyle = grd;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.restore();
+            }
             else {
                 ctx.fillRect(this.x, this.y, this.width, this.height)
             }

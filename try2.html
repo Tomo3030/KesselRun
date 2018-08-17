@@ -18,7 +18,7 @@
         function startGame() {
             myGameArea.start();
             myGamePiece = new component(28,36,"spaceship.png",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "image");
-            finishBorder = new component(myGameArea.canvas.width, 70, "blue",0,0);
+            finishBorder = new component(myGameArea.canvas.width, 300, "grd" ,0,0,"gradient");
             //the finish line is what the gamePiece must actually crashWith() in order to win.
             finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
             score = new component("30px","Orbitron","white",15,30,"text");
@@ -61,7 +61,7 @@
         }
         
         function displayInstructions(){
-            if(myGameArea.keys == null){
+            if(gameOn && myGamePiece.speed < 3){
                 startText = new component("31px", "Orbitron", "fff", 8, myGameArea.canvas.height/3,"text");
                 startText.text = "Press Up Arrow To Accelerate";
                 startText.update();
@@ -72,7 +72,7 @@
             let obstacleOrginSide;
             return function(){
                 //obstacles 
-                if (myGameArea.frameNo == 1 || everyInterval(40)){
+                if (myGameArea.frameNo == 1 || everyInterval(70)){
                     end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
                     start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
                     x = myGameArea.canvas.width;
@@ -185,7 +185,7 @@
                     myGamePiece.moveAngle = myGamePiece.speed;
                     animateSpaceship("left"); 
                 }
-                if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 2)) {
+                if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 3)) {
                     myGamePiece.speed += .03;
                     animateSpaceship("fullblast") }
                     if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
