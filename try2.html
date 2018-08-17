@@ -5,7 +5,7 @@
     <style>
     canvas {
         border:1px solid #d3d3d3;
-        background-color: #f1f1f1;
+        background-color: #000;
     }
 </style>
 </head>
@@ -13,15 +13,11 @@
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <script type="text/javascript" src="objects.js"></script>
     <script>
-        let obstacles = [];
-        let particles = [];
         let gameOn = true;
-
-
-
+        let switcher = true;
         function startGame() {
             myGameArea.start();
-            myGamePiece = new component(15,15,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "turn");
+            myGamePiece = new component(28,36,"spaceship.png",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "image");
             finishBorder = new component(myGameArea.canvas.width, 70, "blue",0,0);
             //the finish line is what the gamePiece must actually crashWith() in order to win.
             finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
@@ -33,7 +29,6 @@
             if((myGameArea.frameNo / n) % 1 == 0){return true;}
             return false;
         }
-
         //myGameArea.start calls this function every interval, as seen above.
         function updateGameArea(){
             myGameArea.clear();
@@ -48,31 +43,27 @@
 
             //displays instructions untill a key is hit
             displayInstructions();
-
             //makes obstacles and orients them 
             displayObstacles();
-
             //moves obscatacles across screen and destroys obstacles offscreen
             moveAndDestroyObstacles();
-
             //check if gamepiece crashed with obstacles, and if it has create explosion.
             checkCrash();
-
             //check if gamepiece has passed the finished line, and if it has create score.
             checkWin();
-
             //check for key stroke. To control the game. 
             checkKeyStroke();
-
             //make sure gamepiece doesn't go outside of canvas
             noOutOfBounds();
+            //make spaceship animation
+            //animateSpaceship();
+            
         }
         
-
         function displayInstructions(){
             if(myGameArea.keys == null){
-                startText = new component("38px", "Orbitron", "fff", 8, myGameArea.canvas.height/3,"text");
-                startText.text = "Press Up Arrow To Start";
+                startText = new component("31px", "Orbitron", "fff", 8, myGameArea.canvas.height/3,"text");
+                startText.text = "Press Up Arrow To Accelerate";
                 startText.update();
             }
         }
@@ -81,46 +72,43 @@
             let obstacleOrginSide;
             return function(){
                 //obstacles 
-                if (myGameArea.frameNo == 1 || everyInterval(30)){
+                if (myGameArea.frameNo == 1 || everyInterval(40)){
                     end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
                     start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
                     x = myGameArea.canvas.width;
                     y = Math.floor((Math.random() * end) + start);
 
                     if(obstacleOrginSide){
-                        obstacles.push(new component(50,10,"green",x,y));
+                        myGameArea.obstacles.push(new component(50,10,"green",x,y));
                         obstacleOrginSide = !obstacleOrginSide;
                     } else {
-                        obstacles.push(new component(50,10,"pink", -20,y));
+                        myGameArea.obstacles.push(new component(50,10,"pink", -20,y));
                         obstacleOrginSide = !obstacleOrginSide; 
                     }
                 }
-
-
             };
         })();
 
         function moveAndDestroyObstacles(){
             //make them appear and move
-            for (let i = 0; i < obstacles.length; i++) {
-                if(obstacles[i].color == "pink"){
-                    obstacles[i].x += 1;
-                    obstacles[i].update();
+            for (let i = 0; i < myGameArea.obstacles.length; i++) {
+                if(myGameArea.obstacles[i].color == "pink"){
+                    myGameArea.obstacles[i].x += 1;
+                    myGameArea.obstacles[i].update();
                 } else{
-                    obstacles[i].x += -1;
-                    obstacles[i].update();
-
+                    myGameArea.obstacles[i].x += -1;
+                    myGameArea.obstacles[i].update();
                 }
                 // delete obstacles that go offscreeen so our array doesn't get crazy long
-                if(obstacles[i].offscreen()){
-                    obstacles.splice(i,1);
+                if(myGameArea.obstacles[i].offscreen()){
+                    myGameArea.obstacles.splice(i,1);
                 } 
             }
         }
 
         function checkCrash(){
-            for(let i = 0; i < obstacles.length; i++) {
-                if((gameOn) && myGamePiece.crashWith(obstacles[i])){
+            for(let i = 0; i < myGameArea.obstacles.length; i++) {
+                if((gameOn) && myGamePiece.crashWith(myGameArea.obstacles[i])){
                     //myGameArea.clear();
                     myGamePiece.width = 0;
                     myGamePiece.height = 0;
@@ -130,31 +118,28 @@
                 }
                 explosion();
             }
-
-            
         }
+
         makeParticles = function(x,y){
             const numberOfParticles = 35;
             let particleAngle = 0;
-
             for (var i = 0; i < numberOfParticles; i++) {
-                particles.push(new component(5,5,"#fff",x,y,"explosion"));
+                myGamePiece.particles.push(new component(5,5,"#fff",x,y,"explosion"));
             }
-
-            for (var i = 0; i < particles.length; i++) {
+            for (var i = 0; i < myGamePiece.particles.length; i++) {
                 particleAngle += 1;
-                particles[i].speed = Math.floor((Math.random()* 2) + 1);
-                particles[i].angle = particleAngle;
+                myGamePiece.particles[i].speed = Math.floor((Math.random()* 2) + 1);
+                myGamePiece.particles[i].angle = particleAngle;
             }  
         }
 
         function explosion(){
-            for (var j = 0; j < particles.length; j++) {
+            for (var j = 0; j < myGamePiece.particles.length; j++) {
                 alpha = ((j-5) * 5)/(-100);
-                particles[j].newPos();
-                particles[j].update(alpha);
-                if(particles[j].offscreen()){
-                    particles.splice(j,1);
+                myGamePiece.particles[j].newPos();
+                myGamePiece.particles[j].update(alpha);
+                if(myGamePiece.particles[j].offscreen()){
+                    myGamePiece.particles.splice(j,1);
                 }
             }
         }
@@ -190,16 +175,25 @@
         function checkKeyStroke(){
             if(gameOn){
                 myGamePiece.speed += .001;
+                animateSpaceship("straight");
                 // game controls
-                if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -myGamePiece.speed; }
-                if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = myGamePiece.speed; }
-                if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed = 2; }
-                if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
+                if (myGameArea.keys && myGameArea.keys[37]) {
+                    myGamePiece.moveAngle = -myGamePiece.speed;
+                    animateSpaceship("right"); 
+                }
+                if (myGameArea.keys && myGameArea.keys[39]) {
+                    myGamePiece.moveAngle = myGamePiece.speed;
+                    animateSpaceship("left"); 
+                }
+                if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 2)) {
+                    myGamePiece.speed += .03;
+                    animateSpaceship("fullblast") }
+                    if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
+                }
             }
-        }
 
-        function noOutOfBounds(){
-             if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+            function noOutOfBounds(){
+               if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
                 myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
                 myGamePiece.speed -= .002;
             }
@@ -216,7 +210,43 @@
             }
         }
 
-    </script>
+        // arguments should be straight, right or left, fullblast
+        function animateSpaceship(direction){
+            if(myGameArea.frameNo%5==0){
+                if(direction == "straight"){
+                    myGamePiece.cropPosY = 0;
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "left"){
+                    myGamePiece.cropPosY = myGamePiece.height;
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "right"){
+                    myGamePiece.cropPosY = (myGamePiece.height*2);
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "fullblast"){
+                    myGamePiece.cropPosY = (myGamePiece.height*3);
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+            }
+        }
 
-</body>
-</html>
+
+
+        </script>
+
+    </body>
+    </html>

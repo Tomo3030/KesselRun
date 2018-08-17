@@ -15,6 +15,7 @@
             window.addEventListener('keyup', function(e){
                 myGameArea.keys[e.keyCode] = false;
             })
+            this.obstacles = [];
         },
 
         clear : function(){
@@ -28,14 +29,22 @@
 
     function component(width, height, color, x, y, type){
         this.type = type;
+        if(this.type == "image"){
+            this.image = new Image();
+            this.image.src = color;
+            this.cropPosX = 0;
+            this.cropPosY = 0;
+        } else{
+            this.color = color;
+        }
         this.width = width;
         this.height = height;
-        this.color = color;
         this.x = x;
         this.y = y;
         this.angle = 0;
         this.moveAngle = 0;
         this.speed = 0;
+        this.particles = [];
 
         
         this.update = function(alpha){
@@ -57,7 +66,13 @@
                 ctx.globalAlpha = alpha;
                 ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
                 ctx.restore();
-            }
+            } else if(this.type == 'image'){
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.drawImage(this.image,this.cropPosX,this.cropPosY,28,36, this.width / -2, this.height / -2, this.width, this.height);
+                ctx.restore();
+            } 
             else {
                 ctx.fillRect(this.x, this.y, this.width, this.height)
             }
