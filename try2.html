@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <script type="text/javascript" src="objects.js"></script>
     <script>
+        // 1) can't get obstacles to come from the left side. 
+        // 2) ship crashes with obstacles too soon when approaching from the left. and too late from the right. or vice versa i'm not sure.  
         let gameOn = true;
         let switcher = true;
         function startGame() {
@@ -21,7 +23,7 @@
             finishBorder = new component(myGameArea.canvas.width, 300, "grd" ,0,0,"gradient");
             //the finish line is what the gamePiece must actually crashWith() in order to win.
             finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
-            score = new component("30px","Orbitron","white",15,30,"text");
+            score = new component("30px","Orbitron","white",15,myGameArea.canvas.height -30,"text");
         }
 
         //myGameArea.start uses this function to decide the update interval.
@@ -55,8 +57,6 @@
             checkKeyStroke();
             //make sure gamepiece doesn't go outside of canvas
             noOutOfBounds();
-            //make spaceship animation
-            //animateSpaceship();
             
         }
         
@@ -77,12 +77,15 @@
                     start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
                     x = myGameArea.canvas.width;
                     y = Math.floor((Math.random() * end) + start);
+                    let astroid = myGameArea.astroidType[Math.floor(Math.random()*myGameArea.astroidType.length)];
 
                     if(obstacleOrginSide){
-                        myGameArea.obstacles.push(new component(50,10,"green",x,y));
+                        //myGameArea.obstacles.push(new component(25,25, "white", x, y, 'turn'));
+                        myGameArea.obstacles.push(new component(25,25,astroid,x,y,"image"));
                         obstacleOrginSide = !obstacleOrginSide;
                     } else {
-                        myGameArea.obstacles.push(new component(50,10,"pink", -20,y));
+                        //myGameArea.obstacles.push(new component(25,25, "white", -10, y, 'turn', "left"));
+                        myGameArea.obstacles.push(new component(25,25,astroid, -10,y,"image","left"));
                         obstacleOrginSide = !obstacleOrginSide; 
                     }
                 }
@@ -92,13 +95,15 @@
         function moveAndDestroyObstacles(){
             //make them appear and move
             for (let i = 0; i < myGameArea.obstacles.length; i++) {
-                if(myGameArea.obstacles[i].color == "pink"){
-                    myGameArea.obstacles[i].x += 1;
-                    myGameArea.obstacles[i].update();
+                if(myGameArea.obstacles[i].side == "left"){
+                    myGameArea.obstacles[i].x += 1; 
+                    myGameArea.obstacles[i].angle += .03;   
                 } else{
                     myGameArea.obstacles[i].x += -1;
-                    myGameArea.obstacles[i].update();
+                    myGameArea.obstacles[i].angle += -.03;
                 }
+
+                myGameArea.obstacles[i].update();
                 // delete obstacles that go offscreeen so our array doesn't get crazy long
                 if(myGameArea.obstacles[i].offscreen()){
                     myGameArea.obstacles.splice(i,1);
@@ -109,7 +114,8 @@
         function checkCrash(){
             for(let i = 0; i < myGameArea.obstacles.length; i++) {
                 if((gameOn) && myGamePiece.crashWith(myGameArea.obstacles[i])){
-                    //myGameArea.clear();
+                    //myGameArea.stop();
+                    
                     myGamePiece.width = 0;
                     myGamePiece.height = 0;
                     myGamePiece.speed = 0;
@@ -193,7 +199,7 @@
             }
 
             function noOutOfBounds(){
-               if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+             if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
                 myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
                 myGamePiece.speed -= .002;
             }
@@ -212,7 +218,8 @@
 
         // arguments should be straight, right or left, fullblast
         function animateSpaceship(direction){
-            if(myGameArea.frameNo%5==0){
+            if(myGameArea.frameNo%10==0){
+
                 if(direction == "straight"){
                     myGamePiece.cropPosY = 0;
                     myGamePiece.cropPosX += myGamePiece.width;
@@ -246,7 +253,9 @@
 
 
 
-        </script>
 
-    </body>
-    </html>
+
+</script>
+
+</body>
+</html>

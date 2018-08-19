@@ -16,6 +16,7 @@
                 myGameArea.keys[e.keyCode] = false;
             })
             this.obstacles = [];
+            this.astroidType = ["astroid1.png","astroid2.png","astroid3.png","astroid4.png","astroid5.png","astroid6.png" ]
         },
 
         clear : function(){
@@ -27,24 +28,24 @@
         }
     }
 
-    function component(width, height, color, x, y, type){
+    function component(width, height, color, x, y, type, side){
         this.type = type;
         if(this.type == "image"){
             this.image = new Image();
             this.image.src = color;
             this.cropPosX = 0;
             this.cropPosY = 0;
-        } else{
-            this.color = color;
-        }
+        } 
+        this.color = color;
         this.width = width;
         this.height = height;
         this.x = x;
-        this.y = y;
+        this.y = y; 
         this.angle = 0;
         this.moveAngle = 0;
         this.speed = 0;
         this.particles = [];
+        this.side = side;
 
         
         this.update = function(alpha){
@@ -70,7 +71,7 @@
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.angle);
-                ctx.drawImage(this.image,this.cropPosX,this.cropPosY,28,36, this.width / -2, this.height / -2, this.width, this.height);
+                ctx.drawImage(this.image,this.cropPosX,this.cropPosY,this.width,this.height, this.width / -2, this.height / -2, this.width, this.height);
                 ctx.restore();
             } else if(this.type == 'gradient'){
                 let grd = ctx.createRadialGradient(this.width/2,0,10,this.width/2,0,250);
@@ -83,6 +84,8 @@
                 ctx.fillStyle = grd;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.restore();
+            } else if(this.type == 'circle'){
+
             }
             else {
                 ctx.fillRect(this.x, this.y, this.width, this.height)
@@ -96,22 +99,55 @@
         }
 
         this.crashWith = function(obstacle){
-            //because of the updateTurn function you need to get the proper paremeter of the obstacle you need to times
-            // the game piece by half its own height or width.
-            let front = (this.y) - (this.height/2.3);
-            let back = this.y + (this.height/2.3);
-            let left = this.x - (this.height/2.3);
-            let right = this.x + (this.width/2.3);
-            let obstacleFront = obstacle.y;
-            let obstacleBack = obstacle.y + (obstacle.height);
-            let obstacleLeft = obstacle.x;
-            let obstacleRight = obstacle.x + (obstacle.width);
+            //problems space ship is triangle. Not square.
+            //obstacles are unenven blobs ... not squares.
+            // let shipFront = this.y;
+            // let shipBack = this.y + (this.height);
+            // let shipLeft = this.x;
+            // let shipRight = this.x + (this.width);
+            // let obstacleFront = obstacle.y;
+            // let obstacleBack = obstacle.y + (obstacle.height);
+            // let obstacleLeft = obstacle.x;
+            // let obstacleRight = obstacle.x + (obstacle.width);
+
+            // let obstacleCx = obstacle.x - (obstacle.width/2);
+            // let obstacleCy = obstacle.y - (obstacle.height/2);
+            // let obstacleR = obstacle.width/2;
+
+            // let crash = false;
+
+            // if((shipFront < obstacleBack) && (shipBack > obstacleFront) && (shipLeft < obstacleRight) && (shipRight > obstacleLeft)){
+            //     console.log("ship= " + shipFront,shipBack,shipLeft,shipRight);
+            //     console.log("obstacle = " + obstacleFront,obstacleBack,obstacleLeft,obstacleRight);
+            //     crash = true;
+            // }
+            // return crash;
+
+            let distanceBetweenX = Math.abs(obstacle.x + (obstacle.width/2) - this.x - this.width/2);
+            //console.log(distanceBetweenX);
+            let distanceBetweenY = Math.abs(obstacle.y + (obstacle.height/2) - this.y - this.height/2);
             let crash = false;
 
-            if((front < obstacleBack) && (left < obstacleRight) && (right > obstacleLeft) && (back > obstacleFront)){
+            if(distanceBetweenX > (this.width/2 + (obstacle.width/2 + 2))){return crash;}
+            if(distanceBetweenY > (this.height/2 + (obstacle.width/2 + 2))){return crash;}
+            if(distanceBetweenX <= this.width/2 && distanceBetweenY <= this.height/2){
+                console.log(distanceBetweenX);
+                console.log('X');
                 crash = true;
+                return crash;
             }
-            return crash; 
+            // if(distanceBetweenY <=this.height/2){
+            //     console.log('Y');
+            //     crash = true;
+            //     return crash;
+            // }
+            // let dx = distanceBetweenX - this.width/2;
+            // let dy = distanceBetweenY - this.height/2;
+            // if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){
+            //     console.log("strage");
+            //     crash = true;
+            //     return crash;
+            // }
         }
 
         this.offscreen = function(){

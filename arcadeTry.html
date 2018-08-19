@@ -11,9 +11,6 @@
 </head>
 <body onload="startGame()">
     <script>
-        let leftObstacles = [];
-        let rightObstacles = [];
-
         function startGame() {
             myGameArea.start();
             myGamePiece = new component(25,25,"red",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95);
