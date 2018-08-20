@@ -16,7 +16,7 @@
                 myGameArea.keys[e.keyCode] = false;
             })
             this.obstacles = [];
-            this.astroidType = ["astroid1.png","astroid2.png","astroid3.png","astroid4.png","astroid5.png","astroid6.png" ]
+            this.astroidType = ["images/astroid1.png","images/astroid2.png","images/astroid3.png","images/astroid4.png","images/astroid5.png","images/astroid6.png" ]
         },
 
         clear : function(){
@@ -35,7 +35,9 @@
             this.image.src = color;
             this.cropPosX = 0;
             this.cropPosY = 0;
-        } 
+        }
+        if(this.type == "gradient"){
+        }
         this.color = color;
         this.width = width;
         this.height = height;
@@ -76,17 +78,14 @@
             } else if(this.type == 'gradient'){
                 let grd = ctx.createRadialGradient(this.width/2,0,10,this.width/2,0,250);
                 grd.addColorStop(0, "darkgray");
-                grd.addColorStop(.5, "white");
+                grd.addColorStop(.5, this.color);
                 grd.addColorStop(1,"black");
                 ctx.save();
-                ctx.globalAlpha = alpha;
                 ctx.scale(1,.3);
                 ctx.fillStyle = grd;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.restore();
-            } else if(this.type == 'circle'){
-
-            }
+            } 
             else {
                 ctx.fillRect(this.x, this.y, this.width, this.height)
             }
@@ -98,6 +97,13 @@
             this.y -= this.speed * Math.cos(this.angle);
         }
 
+        this.win = function(obstacle){
+            if(this.y < (0 - this.height)){
+                return true;
+            }
+        }
+
+    
         this.crashWith = function(obstacle){
             //problems space ship is triangle. Not square.
             //obstacles are unenven blobs ... not squares.
@@ -110,51 +116,33 @@
             // let obstacleLeft = obstacle.x;
             // let obstacleRight = obstacle.x + (obstacle.width);
 
-            // let obstacleCx = obstacle.x - (obstacle.width/2);
-            // let obstacleCy = obstacle.y - (obstacle.height/2);
-            // let obstacleR = obstacle.width/2;
-
             // let crash = false;
 
             // if((shipFront < obstacleBack) && (shipBack > obstacleFront) && (shipLeft < obstacleRight) && (shipRight > obstacleLeft)){
-            //     console.log("ship= " + shipFront,shipBack,shipLeft,shipRight);
-            //     console.log("obstacle = " + obstacleFront,obstacleBack,obstacleLeft,obstacleRight);
-            //     crash = true;
-            // }
-            // return crash;
+                //     console.log("ship= " + shipFront,shipBack,shipLeft,shipRight);
+                //     console.log("obstacle = " + obstacleFront,obstacleBack,obstacleLeft,obstacleRight);
+                //     crash = true;
+                // }
+                // return crash;
 
-            let distanceBetweenX = Math.abs(obstacle.x + (obstacle.width/2) - this.x - this.width/2);
-            //console.log(distanceBetweenX);
-            let distanceBetweenY = Math.abs(obstacle.y + (obstacle.height/2) - this.y - this.height/2);
-            let crash = false;
+                let distanceBetweenX = Math.abs(obstacle.x + (obstacle.width/2) - this.x - this.width/2) + 3;
+                let distanceBetweenY = Math.abs(obstacle.y + (obstacle.height/2) - this.y - this.height/2) + 3;
 
-            if(distanceBetweenX > (this.width/2 + (obstacle.width/2 + 2))){return crash;}
-            if(distanceBetweenY > (this.height/2 + (obstacle.width/2 + 2))){return crash;}
-            if(distanceBetweenX <= this.width/2 && distanceBetweenY <= this.height/2){
-                console.log(distanceBetweenX);
-                console.log('X');
-                crash = true;
-                return crash;
+
+                if(distanceBetweenX > (this.width/2 + (obstacle.width/2 + 2))){return false;}
+                if(distanceBetweenY > (this.height/2 + (obstacle.width/2 + 2))){return false;}
+                if(distanceBetweenX <= this.width/2 && distanceBetweenY <= this.height/2){return true;}
+
+                let dx = distanceBetweenX - (this.width/2 - 5);
+                let dy = distanceBetweenY - (this.height/2 - 5);
+                if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){return true;}
             }
-            // if(distanceBetweenY <=this.height/2){
-            //     console.log('Y');
-            //     crash = true;
-            //     return crash;
-            // }
-            // let dx = distanceBetweenX - this.width/2;
-            // let dy = distanceBetweenY - this.height/2;
-            // if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){
-            //     console.log("strage");
-            //     crash = true;
-            //     return crash;
-            // }
-        }
 
-        this.offscreen = function(){
-            if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
-                return true;
-            } else {
-                return false;
+            this.offscreen = function(){
+                if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
-    }

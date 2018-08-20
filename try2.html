@@ -13,14 +13,14 @@
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <script type="text/javascript" src="objects.js"></script>
     <script>
-        // 1) can't get obstacles to come from the left side. 
-        // 2) ship crashes with obstacles too soon when approaching from the left. and too late from the right. or vice versa i'm not sure.  
+        //need to remove finish line.
+        let backgroundColor = 255;
         let gameOn = true;
         let switcher = true;
         function startGame() {
             myGameArea.start();
-            myGamePiece = new component(28,36,"spaceship.png",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "image");
-            finishBorder = new component(myGameArea.canvas.width, 300, "grd" ,0,0,"gradient");
+            myGamePiece = new component(28,36,"images/spaceship.png",(myGameArea.canvas.width/2), myGameArea.canvas.height * .95, "image");
+            finishBorder = new component(myGameArea.canvas.width, 300, "rgb(255,255,255)" ,0,0,"gradient");
             //the finish line is what the gamePiece must actually crashWith() in order to win.
             finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
             score = new component("30px","Orbitron","white",15,myGameArea.canvas.height -30,"text");
@@ -56,8 +56,8 @@
             //check for key stroke. To control the game. 
             checkKeyStroke();
             //make sure gamepiece doesn't go outside of canvas
-            noOutOfBounds();
-            
+            noOutOfBounds(); 
+            changeFinishColor();           
         }
         
         function displayInstructions(){
@@ -155,28 +155,32 @@
         }
 
         function checkWin(){
-            if(myGamePiece.crashWith(finishline)){
-                // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
-                let multiplyer; 
-                if(myGamePiece.x > (myGameArea.canvas.width/2)){
-                    multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
-                } else {
-                    multiplyer = myGamePiece.x;
+            // if(myGamePiece.y < 70){
+            //     finishBorder.color = 'white';
+
+                if(myGamePiece.y < 0 - myGamePiece.height){
+                    // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
+                    let multiplyer; 
+                    if(myGamePiece.x > (myGameArea.canvas.width/2)){
+                        multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
+                    } else {
+                        multiplyer = myGamePiece.x;
+                    }
+                    myGameArea.stop();
+                    displaySpeed = new component("38px", "Orbitron", "fff", 8, 120,"text");
+                    displaySpeed.text = "SPEED: " + (myGamePiece.speed * 1000).toFixed(0);
+                    displaySpeed.update();
+                    displayMultiplyer = new component("38px", "Orbitron", "fff", 8, 170 ,"text");
+                    displayMultiplyer.text = "MULTIPLYER: " + calculateMultiplyer(multiplyer);
+                    displayMultiplyer.update();
+                    displayTotal = new component("38px", "Orbitron", "fff", 8, 220 ,"text");
+                    displayTotal.text = "TOTAL SCORE: " + (calculateMultiplyer(multiplyer) * myGamePiece.speed*1000).toFixed(0);
+                    displayTotal.update();
+                    myGamePiece.speed = 0;
+                    gameOn = !gameOn;
                 }
-                myGameArea.stop();
-                displaySpeed = new component("38px", "Orbitron", "white", 8, 120,"text");
-                displaySpeed.text = "SPEED: " + (myGamePiece.speed * 1000).toFixed(0);
-                displaySpeed.update();
-                displayMultiplyer = new component("38px", "Orbitron", "white", 8, 170 ,"text");
-                displayMultiplyer.text = "MULTIPLYER: " + calculateMultiplyer(multiplyer);
-                displayMultiplyer.update();
-                displayTotal = new component("38px", "Orbitron", "white", 8, 220 ,"text");
-                displayTotal.text = "TOTAL SCORE: " + (calculateMultiplyer(multiplyer) * myGamePiece.speed*1000).toFixed(0);
-                displayTotal.update();
-                myGamePiece.speed = 0;
-                gameOn = !gameOn;
             }
-        }
+        
 
         function checkKeyStroke(){
             if(gameOn){
@@ -199,7 +203,7 @@
             }
 
             function noOutOfBounds(){
-             if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
+               if(myGamePiece.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
                 myGamePiece.x = (myGameArea.canvas.width - myGameArea.canvas.width);
                 myGamePiece.speed -= .002;
             }
@@ -211,14 +215,12 @@
                 myGamePiece.y = (myGameArea.canvas.height- myGamePiece.height);
                 myGamePiece.speed -= .002;
             }
-            if(myGamePiece.y < finishline.height){
-                myGamePiece.y = (finishline.height);
-            }
+
         }
 
         // arguments should be straight, right or left, fullblast
         function animateSpaceship(direction){
-            if(myGameArea.frameNo%10==0){
+            if(myGameArea.frameNo%5==0){
 
                 if(direction == "straight"){
                     myGamePiece.cropPosY = 0;
@@ -250,8 +252,21 @@
                 }
             }
         }
+        function changeFinishColor(){
+            if(myGameArea.frameNo%7==0){
+                backgroundColor += -1;
+                finishBorder.color = "rgb(" + backgroundColor + "," + backgroundColor + ",255)";
+                if(myGamePiece.speed >= 4.5 && myGameArea.frameNo%15==0){
+                if(backgroundColor <= 0 && backgroundColor%2==0){
+                    finishBorder.color = "white";
+                }if(backgroundColor <= 0 && backgroundColor%2==1){
+                    finishBorder.color = "rgb(255,0,0)";
+                }
+            }
+        }
+    }
 
-
+    // "rgb(255," + backgroundColor + "," + backgroundColor + ")";
 
 
 
