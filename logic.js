@@ -9,6 +9,9 @@ function startGame() {
     finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
     score = new component("30px","Orbitron","white",15,myGameArea.canvas.height -30,"text");
     myGameArea.makeStars();
+    for (var i = 0; i < starArray.length; i++) {
+        starArray[i].update();
+    }
 }
 
 //myGameArea.start uses this function to decide the update interval.
@@ -20,9 +23,7 @@ function everyInterval(n){
 function updateGameArea(){
     myGameArea.clear();
 
-    for (var i = 0; i < starArray.length; i++) {
-        starArray[i].update();
-    }
+    
     finishBorder.update();
     finishline.update();
     myGamePiece.newPos();

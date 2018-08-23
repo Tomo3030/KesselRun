@@ -1,17 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
-    <style>
-    canvas {
-        border:1px solid #d3d3d3;
-        background-color: #000;
-    }
+	<title></title>
+	<style>
+		#canvas1{
+		border:1px solid #d3d3d3;
+		background-color: #000;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	#canvas {
+		border:1px solid #d3d3d3;
+		background-color: transparent;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+
+	.wrapper{
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+
 </style>
 </head>
 <body onload="startGame()">
-    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
-    <script type="text/javascript" src="objects.js"></script>
-    <script type="text/javascript" src="logic.js"></script>
+	<div class="wrapper">
+		<canvas id="canvas1" width="540" height="720"></canvas>
+		<canvas id="canvas" width="540" height="720"></canvas>
+	</div>
+	
+	<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+	<script type="text/javascript" src="objects.js"></script>
+	<script type="text/javascript" src="logic.js"></script>
 </body>
 </html>

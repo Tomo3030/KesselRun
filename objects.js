@@ -1,10 +1,12 @@
 const myGameArea = {
-    canvas : document.createElement('canvas'),
+    canvas : document.getElementById('canvas'),
+    canvas1 : document.getElementById('canvas1'),
     start : function(){
-        this.canvas.width = 540;
-        this.canvas.height = 720;
+        //this.canvas.width = 540;
+        //this.canvas.height = 720;
         this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.context1 = this.canvas1.getContext('2d')
+        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         //set Event listeners for controllers:
@@ -147,9 +149,9 @@ const myGameArea = {
             this.backgroundColor += -1;
             finishBorder.color = "rgb(" + this.backgroundColor + "," + this.backgroundColor + ",255)";
             if(myGamePiece.speed >= 5 && myGameArea.frameNo%15==0){
-                if(this.backgroundColor <= 0 && backgroundColor%2==0){
+                if(this.backgroundColor <= 0 && this.backgroundColor%2==0){
                     finishBorder.color = "white";
-                }if(this.backgroundColor <= 0 && backgroundColor%2==1){
+                }if(this.backgroundColor <= 0 && this.backgroundColor%2==1){
                     finishBorder.color = "rgb(255,0,0)";
                 }
             }
@@ -160,10 +162,12 @@ const myGameArea = {
         const numberOfStars = 50;
         for (var i = 0; i < numberOfStars; i++) {
             let starShape = Math.floor((Math.random() * 5) + 1);
-            starArray.push(new component(starShape,starShape,("rgba(255,255,255," + Math.random() +")"), Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height) + 1),"stars")); 
+            starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height) + 1),"stars")); 
         }
     }
 }
+
+// ("rgba(255,255,255," + Math.random() +")")
 
 
 
@@ -227,6 +231,8 @@ function component(width, height, color, x, y, type, side){
             ctx.restore();
         } 
         else if (this.type == "stars") {
+            ctx = myGameArea.context1;
+            ctx.fillStyle = color;
             ctx.save();
             ctx.shadowColor = 'white';
             ctx.shadowBlur = 15;
