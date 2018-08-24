@@ -46,7 +46,8 @@ function updateGameArea(){
     //make sure gamepiece doesn't go outside of canvas
     myGamePiece.noOutOfBounds();
     //makes the finish boarder gradually get more blue and start flashing at around speed 5000 
-    myGameArea.changeFinishColor();           
+    myGameArea.changeFinishColor();
+               
 }
 
 

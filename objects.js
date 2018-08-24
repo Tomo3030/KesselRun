@@ -116,7 +116,7 @@ const myGameArea = {
     },
 
     checkWin : function(){
-        if(myGamePiece.y < 0 - myGamePiece.height){
+        if(myGamePiece.y < - myGamePiece.height){
             // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
             let multiplyer; 
             if(myGamePiece.x > (myGameArea.canvas.width/2)){
@@ -125,17 +125,27 @@ const myGameArea = {
                 multiplyer = myGamePiece.x;
             }
             myGameArea.stop();
-            displaySpeed = new component("38px", "Orbitron", "fff", 8, 120,"text");
-            displaySpeed.text = "SPEED: " + (myGamePiece.speed * 1000).toFixed(0);
-            displaySpeed.update();
-            displayMultiplyer = new component("38px", "Orbitron", "fff", 8, 170 ,"text");
-            displayMultiplyer.text = "MULTIPLYER: " + this.calculateMultiplyer(multiplyer);
-            displayMultiplyer.update();
-            displayTotal = new component("38px", "Orbitron", "fff", 8, 220 ,"text");
-            displayTotal.text = "TOTAL SCORE: " + (this.calculateMultiplyer(multiplyer) * myGamePiece.speed*1000).toFixed(0);
-            displayTotal.update();
+            myGameArea.clear();
+            finishBorder.update();
+            let speed = (myGamePiece.speed * 1000).toFixed(0);
+            let multiDisplay = this.calculateMultiplyer(multiplyer);
+            let score = (multiDisplay * speed).toFixed(0);
+            $("#speed").text(speed);
+            $("#multiplyer").text(multiDisplay);
+            $("#score").text(score);
+            $(".scoreboard").removeClass("hidden");
+
             myGamePiece.speed = 0;
             myGameArea.gameOn = !myGameArea.gameOn;
+
+            highScoreListScore = [7000,8000,9000,10000,11000];
+            highScoreListScore.sort(function(a,b){return b - a});
+            highScoreListName = ['Tim','Slim','Trim','Dim','Bimbo'];
+
+            $('.highscore').each(function(index){
+                $(this).text(highScoreListScore[index]);
+            })
+
         }
 
     },
@@ -162,13 +172,10 @@ const myGameArea = {
         const numberOfStars = 50;
         for (var i = 0; i < numberOfStars; i++) {
             let starShape = Math.floor((Math.random() * 5) + 1);
-            starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height) + 1),"stars")); 
+            starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height * .90) + 1),"stars")); 
         }
     }
 }
-
-// ("rgba(255,255,255," + Math.random() +")")
-
 
 
 
@@ -313,6 +320,11 @@ function component(width, height, color, x, y, type, side){
                 this.animateSpaceship("fullblast") }
                 if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
             }
+            //remove this after finish scoreboard
+            if (myGameArea.keys && myGameArea.keys[32] && (myGamePiece.speed < 10)) {
+                myGamePiece.speed += .03;
+                this.animateSpaceship("fullblast") }
+                if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
         }
         // arguments should be: straight, left, right, and fullblast
         this.animateSpaceship = function(direction){
@@ -350,8 +362,6 @@ function component(width, height, color, x, y, type, side){
 
     }
 }
-
-
 
 
 
