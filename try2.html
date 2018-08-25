@@ -80,32 +80,53 @@
 		visibility: hidden;
 	}
 
+	.nameInput{
+		position: absolute;
+		top: 100px;
+		display: block;
+		text-align: center;
+	}
+
+	.text{
+		width: 60%;
+		padding: 12px 20px;
+		margin-bottom: 15px;
+		border-radius: 5px;
+		text-align: center;
+	}
+
+	.submit{
+		margin: auto;
+	}
 
 
-	/*STYLE FOR SCOREBOARD*/
 
 
 
 </style>
+
+
 </head>
 <body onload="startGame()">
+	<!-- CANVAS STUFF -->
 	<div class="wrapper">
 		<canvas id="canvas1" width="540" height="720"></canvas>
 		<canvas id="canvas" width="540" height="720"></canvas>
 	</div>
 
+	<!-- SCOREBOARD STUFF -->
 	<div class="scoreboard hidden">
 	<div class="container top">
 		<h2 class="inline left style">SPEED : </h2>
-		<h2 class="right style" id="speed"> 18418 </h2>
+		<h2 class="right style" id="speed"> 0 </h2>
 	</div>
 	<div class="container line">
 		<h2 class="inline left style">MULTIPLYER : </h2>
-		<h2 class="right style" id="multiplyer"> 1.88 </h2>
+		<h2 class="right style" id="multiplyer"> 0 </h2>
 	</div>
 	<div class="container">
 		<h2 class="inline left style">YOUR SCORE : </h2>
-		<h2 class="right style" id="score"> 10481 </h2>
+		<h2 class="right style" id="score"> 0 </h2>
 	</div>
 	<div class="container">
 		<div></div>
@@ -149,9 +170,17 @@
 	</div>
 	<div class="container style">
 		<div></div>
-	<p class="button">TRY AGAIN</p>
+	<p class="reload button">TRY AGAIN</p>
 	<div></div>
 	</div>
+	</div>
+
+	<!-- NAME INPUT STUFF -->
+
+	<div class="container nameInput style hidden">
+		<input class="text" type="text" id="name" name="name" required maxlength="8"
+               placeholder="Enter You Name Here" autocomplete="off" />
+        <div class="button submit">SUBMIT</div>
 	</div>
 
 

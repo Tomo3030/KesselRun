@@ -1,3 +1,20 @@
+highScoreList1 = [
+        {name: "Tim", score: 11000},
+        {name: "Slim", score: 10000 },
+        {name: "Trim", score: 9000},
+        {name: "Dim", score: 8000},
+        {name: "Bim.bo", score: 7000}
+        ]
+
+localStorage.setItem("highscoreStored", JSON.stringify(highScoreList1));
+
+let listy = JSON.parse(localStorage.getItem("highscoreStored"));
+
+console.log(listy);
+
+
+
+
 const myGameArea = {
     canvas : document.getElementById('canvas'),
     canvas1 : document.getElementById('canvas1'),
@@ -22,6 +39,14 @@ const myGameArea = {
         this.obstacleOrginSide;
         this.gameOn = true;
         this.backgroundColor = 255;
+        this.score;
+        this.highScoreList = [
+        {name: "Tim", score: 11000},
+        {name: "Slim", score: 10000 },
+        {name: "Trim", score: 9000},
+        {name: "Dim", score: 8000},
+        {name: "Bim..bo", score: 7000}
+        ]
     },
 
     clear : function(){
@@ -88,6 +113,7 @@ const myGameArea = {
                 this.makeParticles(myGamePiece.x,myGamePiece.y);   
             }
             this.explosion();
+
         }
     },
 
@@ -112,6 +138,9 @@ const myGameArea = {
             if(myGamePiece.particles[j].offscreen()){
                 myGamePiece.particles.splice(j,1);
             }
+            if(myGamePiece.particles.length == 0){
+                this.show();
+            }
         }
     },
 
@@ -129,25 +158,23 @@ const myGameArea = {
             finishBorder.update();
             let speed = (myGamePiece.speed * 1000).toFixed(0);
             let multiDisplay = this.calculateMultiplyer(multiplyer);
-            let score = (multiDisplay * speed).toFixed(0);
+            yourScore = (multiDisplay * speed).toFixed(0);
             $("#speed").text(speed);
             $("#multiplyer").text(multiDisplay);
-            $("#score").text(score);
-            $(".scoreboard").removeClass("hidden");
+            $("#score").text(yourScore);
+            
 
             myGamePiece.speed = 0;
             myGameArea.gameOn = !myGameArea.gameOn;
 
-            highScoreListScore = [7000,8000,9000,10000,11000];
-            highScoreListScore.sort(function(a,b){return b - a});
-            highScoreListName = ['Tim','Slim','Trim','Dim','Bimbo'];
-
-            $('.highscore').each(function(index){
-                $(this).text(highScoreListScore[index]);
-            })
-
+            for (var i = 0; i < this.highScoreList.length; i++) {
+                if(yourScore > this.highScoreList[i].score){
+                    this.giveName(i);
+                    break;
+                }  
+            }
+            this.show();
         }
-
     },
 
     calculateMultiplyer : function(multiplyer){
@@ -174,7 +201,40 @@ const myGameArea = {
             let starShape = Math.floor((Math.random() * 5) + 1);
             starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height * .90) + 1),"stars")); 
         }
-    }
+    },
+
+    makeScore : function(highScoreName,i){
+     let newScore = {name: highScoreName, score: yourScore};
+     this.highScoreList.splice(i,1,newScore);
+     this.show();
+ },
+
+ show : function(){
+     $(".scoreboard").removeClass("hidden");
+
+     $('.highscore').each(function(index){
+        $(this).text(myGameArea.highScoreList[index].score);
+    });
+
+     $('.name').each(function(index){
+        $(this).text(myGameArea.highScoreList[index].name);
+    });
+
+     $('.reload').click(function(){
+        location.reload();
+    });
+
+ },
+
+ giveName : function(i){
+  $('.nameInput').removeClass('hidden');
+  $('.submit').click(function(){
+    highScoreName = $('.text').val();
+    $('.nameInput').addClass('hidden');
+    myGameArea.makeScore(highScoreName, i);
+});
+
+}
 }
 
 
@@ -325,45 +385,40 @@ function component(width, height, color, x, y, type, side){
                 myGamePiece.speed += .03;
                 this.animateSpaceship("fullblast") }
                 if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
-        }
-        // arguments should be: straight, left, right, and fullblast
-        this.animateSpaceship = function(direction){
-           if(myGameArea.frameNo%5==0){
+            }
+            // arguments should be: straight, left, right, and fullblast
+            this.animateSpaceship = function(direction){
+             if(myGameArea.frameNo%5==0){
 
-            if(direction == "straight"){
-                myGamePiece.cropPosY = 0;
-                myGamePiece.cropPosX += myGamePiece.width;
-                if(myGamePiece.cropPosX > myGamePiece.width*2){
-                    myGamePiece.cropPosX = 0;
+                if(direction == "straight"){
+                    myGamePiece.cropPosY = 0;
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "left"){
+                    myGamePiece.cropPosY = myGamePiece.height;
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "right"){
+                    myGamePiece.cropPosY = (myGamePiece.height*2);
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
+                }
+                if(direction == "fullblast"){
+                    myGamePiece.cropPosY = (myGamePiece.height*3);
+                    myGamePiece.cropPosX += myGamePiece.width;
+                    if(myGamePiece.cropPosX > myGamePiece.width*2){
+                        myGamePiece.cropPosX = 0;
+                    }
                 }
             }
-            if(direction == "left"){
-                myGamePiece.cropPosY = myGamePiece.height;
-                myGamePiece.cropPosX += myGamePiece.width;
-                if(myGamePiece.cropPosX > myGamePiece.width*2){
-                    myGamePiece.cropPosX = 0;
-                }
-            }
-            if(direction == "right"){
-                myGamePiece.cropPosY = (myGamePiece.height*2);
-                myGamePiece.cropPosX += myGamePiece.width;
-                if(myGamePiece.cropPosX > myGamePiece.width*2){
-                    myGamePiece.cropPosX = 0;
-                }
-            }
-            if(direction == "fullblast"){
-                myGamePiece.cropPosY = (myGamePiece.height*3);
-                myGamePiece.cropPosX += myGamePiece.width;
-                if(myGamePiece.cropPosX > myGamePiece.width*2){
-                    myGamePiece.cropPosX = 0;
-                }
-            }
-        }
 
+        }
     }
-}
-
-
-
-
-

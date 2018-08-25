@@ -1,5 +1,20 @@
 let starArray = []; 
 
+// let highScoreList = [
+// {name: "Tim", score: 11000},
+// {name: "Slim", score: 10000 },
+// {name: "Trim", score: 9000},
+// {name: "Dim", score: 8000},
+// {name: "Bim..bo", score: 7000}
+// ];
+
+// let yourScore;
+
+
+
+
+
+
 
 function startGame() {
     myGameArea.start();
@@ -47,7 +62,7 @@ function updateGameArea(){
     myGamePiece.noOutOfBounds();
     //makes the finish boarder gradually get more blue and start flashing at around speed 5000 
     myGameArea.changeFinishColor();
-               
+
 }
 
 
