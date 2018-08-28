@@ -1,16 +1,22 @@
-highScoreList1 = [
-        {name: "Tim", score: 11000},
-        {name: "Slim", score: 10000 },
-        {name: "Trim", score: 9000},
-        {name: "Dim", score: 8000},
-        {name: "Bim.bo", score: 7000}
-        ]
+if(localStorage.getItem("highscoreStored") === null){
+    let highScoreList1 = [
+    {name: "Tim", score: 11000},
+    {name: "Slim", score: 10000 },
+    {name: "Trim", score: 9000},
+    {name: "Dim", score: 8000},
+    {name: "Bim.bo", score: 7000}
+    ];
 
-localStorage.setItem("highscoreStored", JSON.stringify(highScoreList1));
+    localStorage.setItem("highscoreStored", JSON.stringify(highScoreList1));
+}
+
+
 
 let listy = JSON.parse(localStorage.getItem("highscoreStored"));
+console.log(listy)
 
-console.log(listy);
+
+
 
 
 
@@ -40,13 +46,7 @@ const myGameArea = {
         this.gameOn = true;
         this.backgroundColor = 255;
         this.score;
-        this.highScoreList = [
-        {name: "Tim", score: 11000},
-        {name: "Slim", score: 10000 },
-        {name: "Trim", score: 9000},
-        {name: "Dim", score: 8000},
-        {name: "Bim..bo", score: 7000}
-        ]
+        this.highScoreList = JSON.parse(localStorage.getItem("highscoreStored"));
     },
 
     clear : function(){
@@ -145,36 +145,49 @@ const myGameArea = {
     },
 
     checkWin : function(){
-        if(myGamePiece.y < - myGamePiece.height){
-            // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
-            let multiplyer; 
-            if(myGamePiece.x > (myGameArea.canvas.width/2)){
-                multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
-            } else {
-                multiplyer = myGamePiece.x;
-            }
-            myGameArea.stop();
-            myGameArea.clear();
-            finishBorder.update();
-            let speed = (myGamePiece.speed * 1000).toFixed(0);
-            let multiDisplay = this.calculateMultiplyer(multiplyer);
-            yourScore = (multiDisplay * speed).toFixed(0);
-            $("#speed").text(speed);
-            $("#multiplyer").text(multiDisplay);
-            $("#score").text(yourScore);
-            
+        if(myGamePiece.y < - myGamePiece.height){return true;}
+    },
 
-            myGamePiece.speed = 0;
-            myGameArea.gameOn = !myGameArea.gameOn;
+    getGameStats : function(){
 
-            for (var i = 0; i < this.highScoreList.length; i++) {
-                if(yourScore > this.highScoreList[i].score){
-                    this.giveName(i);
-                    break;
-                }  
-            }
-            this.show();
+        // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
+        let multiplyer; 
+        if(myGamePiece.x > (myGameArea.canvas.width/2)){
+            multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
+        } else {
+            multiplyer = myGamePiece.x;
         }
+        myGameArea.stop();
+        myGameArea.clear();
+        finishBorder.update();
+        let speed = (myGamePiece.speed * 1000).toFixed(0);
+        let multiDisplay = this.calculateMultiplyer(multiplyer);
+        yourScore = (multiDisplay * speed).toFixed(0);
+        $("#speed").text(speed);
+        $("#multiplyer").text(multiDisplay);
+        $("#score").text(yourScore);
+        myGamePiece.speed = 0;
+        myGameArea.gameOn = !myGameArea.gameOn;
+        myGamePiece.score = yourScore;
+    },
+
+
+
+    checkHighScore : function(yourScore){
+        yourScore = parseInt(yourScore, 10);
+        function sub(){
+        for (var i = 0; i < myGameArea.highScoreList.length; i++) {
+            
+            
+            if(yourScore > parseInt(myGameArea.highScoreList[i].score,10)){
+                myGamePiece.scorePosition = i;
+                return true;
+            }
+      
+        }
+        } 
+        return sub(); 
+
     },
 
     calculateMultiplyer : function(multiplyer){
@@ -204,29 +217,39 @@ const myGameArea = {
     },
 
     makeScore : function(highScoreName,i){
+
+    //console.log(JSON.parse(localStorage.getItem("highscoreStored")));
+    let highScoreList = JSON.parse(localStorage.getItem("highscoreStored"));
+ 
+
      let newScore = {name: highScoreName, score: yourScore};
-     this.highScoreList.splice(i,1,newScore);
+
+
+     highScoreList.splice(i,0,newScore);
+     highScoreList.pop();
+     localStorage.setItem("highscoreStored", JSON.stringify(highScoreList));
+     myGameArea.highScoreList = highScoreList;
      this.show();
  },
 
  show : function(){
-     $(".scoreboard").removeClass("hidden");
+    $(".scoreboard").removeClass("hidden");
 
-     $('.highscore').each(function(index){
+    $('.highscore').each(function(index){
         $(this).text(myGameArea.highScoreList[index].score);
     });
 
-     $('.name').each(function(index){
+    $('.name').each(function(index){
         $(this).text(myGameArea.highScoreList[index].name);
     });
 
-     $('.reload').click(function(){
+    $('.reload').click(function(){
         location.reload();
     });
 
- },
+},
 
- giveName : function(i){
+giveName : function(i){
   $('.nameInput').removeClass('hidden');
   $('.submit').click(function(){
     highScoreName = $('.text').val();
@@ -247,8 +270,6 @@ function component(width, height, color, x, y, type, side){
         this.cropPosX = 0;
         this.cropPosY = 0;
     }
-    if(this.type == "gradient"){
-    }
     this.color = color;
     this.width = width;
     this.height = height;
@@ -259,6 +280,7 @@ function component(width, height, color, x, y, type, side){
     this.speed = 0;
     this.particles = [];
     this.side = side;
+    this.scorePosition = 5;
 
 
     this.update = function(alpha){
@@ -316,12 +338,6 @@ function component(width, height, color, x, y, type, side){
         this.y -= this.speed * Math.cos(this.angle);
     }
 
-    this.win = function(obstacle){
-        if(this.y < (0 - this.height)){
-            return true;
-        }
-    }
-
 
     this.crashWith = function(obstacle){
 
@@ -375,7 +391,7 @@ function component(width, height, color, x, y, type, side){
                 myGamePiece.moveAngle = myGamePiece.speed;
                 this.animateSpaceship("left"); 
             }
-            if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 3)) {
+            if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 4)) {
                 myGamePiece.speed += .03;
                 this.animateSpaceship("fullblast") }
                 if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }

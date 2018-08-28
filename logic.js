@@ -1,20 +1,5 @@
 let starArray = []; 
 
-// let highScoreList = [
-// {name: "Tim", score: 11000},
-// {name: "Slim", score: 10000 },
-// {name: "Trim", score: 9000},
-// {name: "Dim", score: 8000},
-// {name: "Bim..bo", score: 7000}
-// ];
-
-// let yourScore;
-
-
-
-
-
-
 
 function startGame() {
     myGameArea.start();
@@ -55,14 +40,23 @@ function updateGameArea(){
     //check if gamepiece crashed with obstacles, and if it has create explosion.
     myGameArea.checkCrash();
     //check if gamepiece has passed the finished line, and if it has create score.
-    myGameArea.checkWin();
-    //check for key stroke. To control the game. 
-    myGamePiece.moveSpaceShip();
-    //make sure gamepiece doesn't go outside of canvas
-    myGamePiece.noOutOfBounds();
-    //makes the finish boarder gradually get more blue and start flashing at around speed 5000 
-    myGameArea.changeFinishColor();
+    if(myGameArea.checkWin()){
+        myGameArea.getGameStats();
+        if(myGameArea.checkHighScore(myGamePiece.score)){
+            myGameArea.giveName(myGamePiece.scorePosition);
+        } else{
+            myGameArea.show();
+        }
+    };
 
-}
+//check for key stroke. To control the game. 
+myGamePiece.moveSpaceShip();
+//make sure gamepiece doesn't go outside of canvas
+myGamePiece.noOutOfBounds();
+//makes the finish boarder gradually get more blue and start flashing at around speed 5000 
+myGameArea.changeFinishColor();
+
+};
+
 
 
