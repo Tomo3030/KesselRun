@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Kessel Run</title>
+	<link rel="stylesheet" href="stylesheet.css">
+	<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+</head>
+
+<body onload="startGame()">
+	<!-- CANVAS STUFF -->
+	<div class="wrapper">
+		<canvas id="canvas1" width="540" height="720"></canvas>
+		<canvas id="canvas" width="540" height="720"></canvas>
+	</div>
+
+	<!-- SCOREBOARD STUFF -->
+	<div class="scoreboard hidden">
+		<div class="container top">
+			<h2 class="inline left style">SPEED : </h2>
+			<h2 class="right style" id="speed"> 0 </h2>
+		</div>
+		<div class="container line">
+			<h2 class="inline left style">MULTIPLYER : </h2>
+			<h2 class="right style" id="multiplyer"> 0 </h2>
+		</div>
+		<div class="container">
+			<h2 class="inline left style">YOUR SCORE : </h2>
+			<h2 class="right style" id="score"> 0 </h2>
+		</div>
+		<div class="container">
+			<div></div>
+			<h1 class="style">--- HIGH-SCORES ---</h1>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="rank">1</p>
+			<p class="name">Tim</p>
+			<p class="highscore">10481</p>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="rank">2</p>
+			<p class="name">Tim</p>
+			<p class="highscore">10481</p>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="rank">3</p>
+			<p class="name">Tim</p>
+			<p class="highscore">10481</p>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="rank">4</p>
+			<p class="name">Tim</p>
+			<p class="highscore">10481</p>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="rank">5</p>
+			<p class="name">Tim</p>
+			<p class="highscore">10481</p>
+			<div></div>
+		</div>
+		<div class="container style">
+			<div></div>
+			<p class="reload button">TRY AGAIN</p>
+			<div></div>
+		</div>
+	</div>
+
+	<!-- NAME INPUT STUFF -->
+
+	<div class="container nameInput style hidden">
+		<input class="text" type="text" id="name" name="name" required maxlength="8"
+		placeholder="Enter You Name Here" autocomplete="off" />
+		<div class="button submit">SUBMIT</div>
+	</div>
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="objects.js"></script>
+	<script type="text/javascript" src="logic.js"></script>
+
+</body>
+</html>
