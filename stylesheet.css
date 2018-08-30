@@ -1,0 +1,94 @@
+/*STYLE FOR CANVAS*/
+
+	.wrapper{
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	#canvas1{
+		background-color: #000;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+	}
+	#canvas {
+		border:1px solid #d3d3d3;
+		background-color: transparent;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+	.container{
+		position: relative;
+		width: 400px;
+		display: flex;
+		justify-content: space-between;
+		left: 50px;
+	}
+
+	}
+
+	.left{
+		text-align: left;
+		display: inline;
+	}
+	.right{
+		text-align: right;
+		display: inline;
+	}
+
+	.center{
+		text-align: center;
+	}
+
+	.style{
+		color: white;
+		font-family: Orbitron;
+	}
+
+	.line{
+		border-bottom: 2px solid white;
+	}
+
+	.top{
+		margin-bottom: -25px;
+	}
+
+	.scoreboard{
+		position: relative;
+		top: 100px;
+	}
+
+	.button{
+		height: auto;
+		width: 200px;
+		border: 2px solid white;
+		border-radius: 5px;
+		text-align: center;
+		padding: 20px 0;
+	}
+
+	.hidden{
+		visibility: hidden;
+	}
+
+	.nameInput{
+		position: absolute;
+		top: 100px;
+		display: block;
+		text-align: center;
+	}
+
+	.text{
+		width: 60%;
+		padding: 12px 20px;
+		margin-bottom: 15px;
+		border-radius: 5px;
+		text-align: center;
+	}
+
+	.submit{
+		margin: auto;
+	}
