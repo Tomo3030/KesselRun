@@ -369,10 +369,10 @@ component.prototype.moveSpaceShip = function(){
         if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
 
         //remove this after finish scoreboard
-        if (myGameArea.keys && myGameArea.keys[32] && (myGamePiece.speed < 10)) {
-            myGamePiece.speed += .03;
-            this.animateSpaceship("fullblast") 
-        }
+        // if (myGameArea.keys && myGameArea.keys[32] && (myGamePiece.speed < 10)) {
+        //     myGamePiece.speed += .03;
+        //     this.animateSpaceship("fullblast") 
+        // }
         if (myGameArea.keys && myGameArea.keys[40]) {
             myGamePiece.speed += -.01; 
         }
