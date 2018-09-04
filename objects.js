@@ -164,12 +164,12 @@ const myGameArea = {
         // For the record (parseInt take in a number, and the base system the number should be reprseneted as)
         yourScore = parseInt(yourScore, 10);
         function sub(){
-        for (let i = 0; i < myGameArea.highScoreList.length; i++) {
-            if(yourScore > parseInt(myGameArea.highScoreList[i].score,10)){
-                myGamePiece.scorePosition = i;
-                return true;
+            for (let i = 0; i < myGameArea.highScoreList.length; i++) {
+                if(yourScore > parseInt(myGameArea.highScoreList[i].score,10)){
+                    myGamePiece.scorePosition = i;
+                    return true;
+                }
             }
-        }
         } 
         return sub(); 
 
@@ -203,46 +203,46 @@ const myGameArea = {
 
     makeScore : function(highScoreName,i){
 
-    //console.log(JSON.parse(localStorage.getItem("highscoreStored")));
-    let highScoreList = JSON.parse(localStorage.getItem("highscoreStored"));
- 
-
-     let newScore = {name: highScoreName, score: yourScore};
+        //console.log(JSON.parse(localStorage.getItem("highscoreStored")));
+        let highScoreList = JSON.parse(localStorage.getItem("highscoreStored"));
 
 
-     highScoreList.splice(i,0,newScore);
-     highScoreList.pop();
-     localStorage.setItem("highscoreStored", JSON.stringify(highScoreList));
-     this.highScoreList = highScoreList;
-     this.show();
- },
+        let newScore = {name: highScoreName, score: yourScore};
 
- show : function(){
-    $(".scoreboard").removeClass("hidden");
 
-    $('.highscore').each(function(index){
-        $(this).text(myGameArea.highScoreList[index].score);
+        highScoreList.splice(i,0,newScore);
+        highScoreList.pop();
+        localStorage.setItem("highscoreStored", JSON.stringify(highScoreList));
+        this.highScoreList = highScoreList;
+        this.show();
+    },
+
+    show : function(){
+        $(".scoreboard").removeClass("hidden");
+
+        $('.highscore').each(function(index){
+            $(this).text(myGameArea.highScoreList[index].score);
+        });
+
+        $('.name').each(function(index){
+            $(this).text(myGameArea.highScoreList[index].name);
+        });
+
+        $('.reload').click(function(){
+            location.reload();
+        });
+
+    },
+
+    giveName : function(i){
+      $('.nameInput').removeClass('hidden');
+      $('.submit').click(function(){
+        highScoreName = $('.text').val();
+        $('.nameInput').addClass('hidden');
+        myGameArea.makeScore(highScoreName, i);
     });
 
-    $('.name').each(function(index){
-        $(this).text(myGameArea.highScoreList[index].name);
-    });
-
-    $('.reload').click(function(){
-        location.reload();
-    });
-
-},
-
-giveName : function(i){
-  $('.nameInput').removeClass('hidden');
-  $('.submit').click(function(){
-    highScoreName = $('.text').val();
-    $('.nameInput').addClass('hidden');
-    myGameArea.makeScore(highScoreName, i);
-});
-
-}
+  }
 }
 
 
@@ -323,107 +323,112 @@ function component(width, height, color, x, y, type, side){
         this.y -= this.speed * Math.cos(this.angle);
     }
 
+}
 
-    this.crashWith = function(obstacle){
+component.prototype.scorePosition = 5;
 
-
-        let distanceBetweenX = Math.abs(obstacle.x + (obstacle.width/2) - this.x - this.width/2) + 3;
-        let distanceBetweenY = Math.abs(obstacle.y + (obstacle.height/2) - this.y - this.height/2) + 3;
-
-
-        if(distanceBetweenX > (this.width/2 + (obstacle.width/2 + 2))){return false;}
-        if(distanceBetweenY > (this.height/2 + (obstacle.width/2 + 2))){return false;}
-        if(distanceBetweenX <= this.width/2 && distanceBetweenY <= this.height/2){return true;}
-
-        let dx = distanceBetweenX - (this.width/2 - 5);
-        let dy = distanceBetweenY - (this.height/2 - 5);
-        if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){return true;}
+component.prototype.offscreen = function(){
+    if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
+        return true;
+    } else {
+        return false;
     }
+}
 
-    this.moveSpaceShip = function(){
-        if(myGameArea.gameOn){
-            myGamePiece.speed += .001;
-            this.animateSpaceship("straight");
-            // game controls
-            if (myGameArea.keys && myGameArea.keys[37]) {
-                myGamePiece.moveAngle = -myGamePiece.speed;
-                this.animateSpaceship("right"); 
-            }
-            if (myGameArea.keys && myGameArea.keys[39]) {
-                myGamePiece.moveAngle = myGamePiece.speed;
-                this.animateSpaceship("left"); 
-            }
-            if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 4)) {
-                myGamePiece.speed += .03;
-                this.animateSpaceship("fullblast") }
-                if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
-            }
-            //remove this after finish scoreboard
-            if (myGameArea.keys && myGameArea.keys[32] && (myGamePiece.speed < 10)) {
-                myGamePiece.speed += .03;
-                this.animateSpaceship("fullblast") }
-                if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
-            }
-            // arguments should be: straight, left, right, and fullblast
-            this.animateSpaceship = function(direction){
-             if(myGameArea.frameNo%5==0){
+component.prototype.noOutOfBounds = function(){
+    if(this.x < (myGameArea.canvas.width - (myGameArea.canvas.width))){
+        this.x = (myGameArea.canvas.width - (myGameArea.canvas.width));
+        this.speed -= .002;
+    }
+    if(this.x > (myGameArea.canvas.width + myGamePiece.width/2)){
+        this.x = (myGameArea.canvas.width + myGamePiece.width/2         );
+        this.speed -= .002;
+    }
+    if(this.y > (myGameArea.canvas.height- myGamePiece.height)){
+        this.y = (myGameArea.canvas.height- myGamePiece.height);
+        this.speed -= .002;
+    }
+}
 
-                if(direction == "straight"){
-                    myGamePiece.cropPosY = 0;
-                    myGamePiece.cropPosX += myGamePiece.width;
-                    if(myGamePiece.cropPosX > myGamePiece.width*2){
-                        myGamePiece.cropPosX = 0;
-                    }
-                }
-                if(direction == "left"){
-                    myGamePiece.cropPosY = myGamePiece.height;
-                    myGamePiece.cropPosX += myGamePiece.width;
-                    if(myGamePiece.cropPosX > myGamePiece.width*2){
-                        myGamePiece.cropPosX = 0;
-                    }
-                }
-                if(direction == "right"){
-                    myGamePiece.cropPosY = (myGamePiece.height*2);
-                    myGamePiece.cropPosX += myGamePiece.width;
-                    if(myGamePiece.cropPosX > myGamePiece.width*2){
-                        myGamePiece.cropPosX = 0;
-                    }
-                }
-                if(direction == "fullblast"){
-                    myGamePiece.cropPosY = (myGamePiece.height*3);
-                    myGamePiece.cropPosX += myGamePiece.width;
-                    if(myGamePiece.cropPosX > myGamePiece.width*2){
-                        myGamePiece.cropPosX = 0;
-                    }
-                }
-            }
+component.prototype.moveSpaceShip = function(){
+    if(myGameArea.gameOn){
+        myGamePiece.speed += .001;
+        this.animateSpaceship("straight");
+        // game controls
+        if (myGameArea.keys && myGameArea.keys[37]) {
+            myGamePiece.moveAngle = -myGamePiece.speed;
+            this.animateSpaceship("right"); 
+        }
+        if (myGameArea.keys && myGameArea.keys[39]) {
+            myGamePiece.moveAngle = myGamePiece.speed;
+            this.animateSpaceship("left"); 
+        }
+        if (myGameArea.keys && myGameArea.keys[38] && (myGamePiece.speed < 4)) {
+            myGamePiece.speed += .03;
+            this.animateSpaceship("fullblast")
+        }
+        if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed += -.01; }
 
+        //remove this after finish scoreboard
+        if (myGameArea.keys && myGameArea.keys[32] && (myGamePiece.speed < 10)) {
+            myGamePiece.speed += .03;
+            this.animateSpaceship("fullblast") 
+        }
+        if (myGameArea.keys && myGameArea.keys[40]) {
+            myGamePiece.speed += -.01; 
         }
     }
+}
 
-    component.prototype.offscreen = function(){
-        if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
-            return true;
-        } else {
-            return false;
+component.prototype.animateSpaceship = function(direction){
+   if(myGameArea.frameNo%5==0){
+
+    if(direction == "straight"){
+        myGamePiece.cropPosY = 0;
+        myGamePiece.cropPosX += myGamePiece.width;
+        if(myGamePiece.cropPosX > myGamePiece.width*2){
+            myGamePiece.cropPosX = 0;
         }
     }
-
-    component.prototype.noOutOfBounds = function(){
-        if(this.x < (myGameArea.canvas.width - (myGameArea.canvas.width - myGamePiece.width))){
-            this.x = (myGameArea.canvas.width - (myGameArea.canvas.width - myGamePiece.width));
-            this.speed -= .002;
-        }
-        if(this.x > (myGameArea.canvas.width - myGamePiece.width)){
-            this.x = (myGameArea.canvas.width - myGamePiece.width);
-            this.speed -= .002;
-        }
-        if(this.y > (myGameArea.canvas.height- myGamePiece.height)){
-            this.y = (myGameArea.canvas.height- myGamePiece.height);
-            this.speed -= .002;
+    if(direction == "left"){
+        myGamePiece.cropPosY = myGamePiece.height;
+        myGamePiece.cropPosX += myGamePiece.width;
+        if(myGamePiece.cropPosX > myGamePiece.width*2){
+            myGamePiece.cropPosX = 0;
         }
     }
+    if(direction == "right"){
+        myGamePiece.cropPosY = (myGamePiece.height*2);
+        myGamePiece.cropPosX += myGamePiece.width;
+        if(myGamePiece.cropPosX > myGamePiece.width*2){
+            myGamePiece.cropPosX = 0;
+        }
+    }
+    if(direction == "fullblast"){
+        myGamePiece.cropPosY = (myGamePiece.height*3);
+        myGamePiece.cropPosX += myGamePiece.width;
+        if(myGamePiece.cropPosX > myGamePiece.width*2){
+            myGamePiece.cropPosX = 0;
+        }
+    }
+}
+}
 
-    component.prototype.scorePosition = 5;
+component.prototype.crashWith = function(obstacle){
+
+    let distanceBetweenX = Math.abs(obstacle.x + (obstacle.width/2) - this.x - this.width/2) + 3;
+    let distanceBetweenY = Math.abs(obstacle.y + (obstacle.height/2) - this.y - this.height/2) + 3;
+
+
+    if(distanceBetweenX > (this.width/2 + (obstacle.width/2 + 2))){return false;}
+    if(distanceBetweenY > (this.height/2 + (obstacle.width/2 + 2))){return false;}
+    if(distanceBetweenX <= this.width/2 && distanceBetweenY <= this.height/2){return true;}
+
+    let dx = distanceBetweenX - (this.width/2 - 5);
+    let dy = distanceBetweenY - (this.height/2 - 5);
+    if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){return true;}
+}
+
+
 
 
