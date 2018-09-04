@@ -9,7 +9,7 @@ function startGame() {
     finishline = new component(myGameArea.canvas.width,28,"transparent",0,0);
     score = new component("30px","Orbitron","white",15,myGameArea.canvas.height -30,"text");
     myGameArea.makeStars();
-    for (var i = 0; i < starArray.length; i++) {
+    for (let i = 0; i < starArray.length; i++) {
         starArray[i].update();
     }
 }

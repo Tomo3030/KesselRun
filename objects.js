@@ -1,25 +1,14 @@
 if(localStorage.getItem("highscoreStored") === null){
     let highScoreList1 = [
-    {name: "Tim", score: 11000},
-    {name: "Slim", score: 10000 },
-    {name: "Trim", score: 9000},
-    {name: "Dim", score: 8000},
-    {name: "Bim.bo", score: 7000}
+    {name: "Tim", score: 13000},
+    {name: "Slim", score: 9000 },
+    {name: "Trim", score: 8000},
+    {name: "Dim", score: 7000},
+    {name: "Bim.bo", score: 6000}
     ];
 
     localStorage.setItem("highscoreStored", JSON.stringify(highScoreList1));
 }
-
-
-
-let listy = JSON.parse(localStorage.getItem("highscoreStored"));
-console.log(listy)
-
-
-
-
-
-
 
 const myGameArea = {
     canvas : document.getElementById('canvas'),
@@ -58,54 +47,52 @@ const myGameArea = {
     },
 
     displayObstacles : function(){
-        if (myGameArea.frameNo == 1 || everyInterval(70)){
-            end = myGameArea.canvas.height - myGameArea.canvas.height * .20;
-            start = myGameArea.canvas.height - myGameArea.canvas.height * .90;
-            x = myGameArea.canvas.width;
+        if (this.frameNo == 1 || everyInterval(70)){
+            end = this.canvas.height - this.canvas.height * .20;
+            start = this.canvas.height - this.canvas.height * .90;
+            x = this.canvas.width;
             y = Math.floor((Math.random() * end) + start);
-            let astroid = myGameArea.astroidType[Math.floor(Math.random()*myGameArea.astroidType.length)];
+            let astroid = this.astroidType[Math.floor(Math.random() * this.astroidType.length)];
 
             if(this.obstacleOrginSide){
-                //myGameArea.obstacles.push(new component(25,25, "white", x, y, 'turn'));
-                myGameArea.obstacles.push(new component(25,25,astroid,x,y,"image"));
+                this.obstacles.push(new component(25,25,astroid,x,y,"image"));
                 this.obstacleOrginSide = !this.obstacleOrginSide;
             } else {
-                //myGameArea.obstacles.push(new component(25,25, "white", -10, y, 'turn', "left"));
-                myGameArea.obstacles.push(new component(25,25,astroid, -10,y,"image","left"));
+                this.obstacles.push(new component(25,25,astroid, -10,y,"image","left"));
                 this.obstacleOrginSide = !this.obstacleOrginSide; 
             }
         }
     },
 
     moveAndDestroyObstacles : function(){
-        for (let i = 0; i < myGameArea.obstacles.length; i++) {
-            if(myGameArea.obstacles[i].side == "left"){
-                myGameArea.obstacles[i].x += 1; 
-                myGameArea.obstacles[i].angle += .03;   
+        for (let i = 0; i < this.obstacles.length; i++) {
+            if(this.obstacles[i].side == "left"){
+                this.obstacles[i].x += 1; 
+                this.obstacles[i].angle += .03;   
             } else{
-                myGameArea.obstacles[i].x += -1;
-                myGameArea.obstacles[i].angle += -.03;
+                this.obstacles[i].x += -1;
+                this.obstacles[i].angle += -.03;
             }
 
-            myGameArea.obstacles[i].update();
+            this.obstacles[i].update();
             // delete obstacles that go offscreeen so our array doesn't get crazy long
-            if(myGameArea.obstacles[i].offscreen()){
-                myGameArea.obstacles.splice(i,1);
+            if(this.obstacles[i].offscreen()){
+                this.obstacles.splice(i,1);
             } 
         }
     },
 
     displayInstructions : function(){
         if(this.gameOn && myGamePiece.speed < 3){
-            startText = new component("31px", "Orbitron", "fff", 8, myGameArea.canvas.height/3,"text");
+            startText = new component("31px", "Orbitron", "fff", 8, this.canvas.height/3,"text");
             startText.text = "Press Up Arrow To Accelerate";
             startText.update();
         }
     },
 
     checkCrash : function(){
-        for(let i = 0; i < myGameArea.obstacles.length; i++) {
-            if((this.gameOn) && myGamePiece.crashWith(myGameArea.obstacles[i])){
+        for(let i = 0; i < this.obstacles.length; i++) {
+            if((this.gameOn) && myGamePiece.crashWith(this.obstacles[i])){
                 myGamePiece.width = 0;
                 myGamePiece.height = 0;
                 myGamePiece.speed = 0;
@@ -120,18 +107,18 @@ const myGameArea = {
     makeParticles : function(x,y){
         const numberOfParticles = 35;
         let particleAngle = 0;
-        for (var i = 0; i < numberOfParticles; i++) {
+        for (let i = 0; i < numberOfParticles; i++) {
             myGamePiece.particles.push(new component(5,5,"#fff",x,y,"explosion"));
         }
-        for (var i = 0; i < myGamePiece.particles.length; i++) {
+        for (let i = 0; i < myGamePiece.particles.length; i++) {
             particleAngle += 1;
-            myGamePiece.particles[i].speed = Math.floor((Math.random()* 2) + 1);
+            myGamePiece.particles[i].speed = Math.floor((Math.random()* 2.5) + 1.5);
             myGamePiece.particles[i].angle = particleAngle;
         } 
     },
 
     explosion : function(){
-        for (var j = 0; j < myGamePiece.particles.length; j++) {
+        for (let j = 0; j < myGamePiece.particles.length; j++) {
             alpha = ((j-5) * 5)/(-100);
             myGamePiece.particles[j].newPos();
             myGamePiece.particles[j].update(alpha);
@@ -152,13 +139,13 @@ const myGameArea = {
 
         // this just checks where along the x axis the game piece crosses the line. The player wants to cross line in the middle. This if statement below just makes sure the multplyer is >270 (canvas/2). becuase later calculateMuliplyer funtion turns the variable muliplyer into value of maximum two.
         let multiplyer; 
-        if(myGamePiece.x > (myGameArea.canvas.width/2)){
-            multiplyer = (myGamePiece.x - myGameArea.canvas.width) * -1;
+        if(myGamePiece.x > (this.canvas.width/2)){
+            multiplyer = (myGamePiece.x - this.canvas.width) * -1;
         } else {
             multiplyer = myGamePiece.x;
         }
-        myGameArea.stop();
-        myGameArea.clear();
+        this.stop();
+        this.clear();
         finishBorder.update();
         let speed = (myGamePiece.speed * 1000).toFixed(0);
         let multiDisplay = this.calculateMultiplyer(multiplyer);
@@ -167,23 +154,21 @@ const myGameArea = {
         $("#multiplyer").text(multiDisplay);
         $("#score").text(yourScore);
         myGamePiece.speed = 0;
-        myGameArea.gameOn = !myGameArea.gameOn;
+        this.gameOn = !this.gameOn;
         myGamePiece.score = yourScore;
     },
 
-
-
     checkHighScore : function(yourScore){
+        //just for the record, what is happening here when we read the scores out from memeory the score is a string,
+        // so we need to parseInt to make it an int and campairable.
+        // For the record (parseInt take in a number, and the base system the number should be reprseneted as)
         yourScore = parseInt(yourScore, 10);
         function sub(){
-        for (var i = 0; i < myGameArea.highScoreList.length; i++) {
-            
-            
+        for (let i = 0; i < myGameArea.highScoreList.length; i++) {
             if(yourScore > parseInt(myGameArea.highScoreList[i].score,10)){
                 myGamePiece.scorePosition = i;
                 return true;
             }
-      
         }
         } 
         return sub(); 
@@ -191,14 +176,14 @@ const myGameArea = {
     },
 
     calculateMultiplyer : function(multiplyer){
-        return((multiplyer * 2)/(myGameArea.canvas.width/2)).toFixed(2);
+        return((multiplyer * 2)/(this.canvas.width/2)).toFixed(2);
     },
 
     changeFinishColor : function(){
-        if(myGameArea.frameNo%7==0){
+        if(this.frameNo%7==0){
             this.backgroundColor += -1;
             finishBorder.color = "rgb(" + this.backgroundColor + "," + this.backgroundColor + ",255)";
-            if(myGamePiece.speed >= 5 && myGameArea.frameNo%15==0){
+            if(myGamePiece.speed >= 5 && this.frameNo%15==0){
                 if(this.backgroundColor <= 0 && this.backgroundColor%2==0){
                     finishBorder.color = "white";
                 }if(this.backgroundColor <= 0 && this.backgroundColor%2==1){
@@ -210,9 +195,9 @@ const myGameArea = {
 
     makeStars : function(){
         const numberOfStars = 50;
-        for (var i = 0; i < numberOfStars; i++) {
+        for (let i = 0; i < numberOfStars; i++) {
             let starShape = Math.floor((Math.random() * 5) + 1);
-            starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * myGameArea.canvas.width) + 1),Math.floor((Math.random() * myGameArea.canvas.height * .90) + 1),"stars")); 
+            starArray.push(new component(starShape,starShape,"white", Math.floor((Math.random() * this.canvas.width) + 1),Math.floor((Math.random() * this.canvas.height * .90) + 1),"stars")); 
         }
     },
 
@@ -228,7 +213,7 @@ const myGameArea = {
      highScoreList.splice(i,0,newScore);
      highScoreList.pop();
      localStorage.setItem("highscoreStored", JSON.stringify(highScoreList));
-     myGameArea.highScoreList = highScoreList;
+     this.highScoreList = highScoreList;
      this.show();
  },
 
@@ -280,7 +265,7 @@ function component(width, height, color, x, y, type, side){
     this.speed = 0;
     this.particles = [];
     this.side = side;
-    this.scorePosition = 5;
+    //this.scorePosition = 5;
 
 
     this.update = function(alpha){
@@ -355,29 +340,6 @@ function component(width, height, color, x, y, type, side){
         if(dx * dx + dy * dy <= ((obstacle.width/2) * (obstacle.width/2))){return true;}
     }
 
-    this.offscreen = function(){
-        if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    this.noOutOfBounds = function(){
-        if(this.x < (myGameArea.canvas.width - myGameArea.canvas.width)){
-            this.x = (myGameArea.canvas.width - myGameArea.canvas.width);
-            this.speed -= .002;
-        }
-        if(this.x > (myGameArea.canvas.width - myGamePiece.width)){
-            this.x = (myGameArea.canvas.width - myGamePiece.width);
-            this.speed -= .002;
-        }
-        if(this.y > (myGameArea.canvas.height- myGamePiece.height)){
-            this.y = (myGameArea.canvas.height- myGamePiece.height);
-            this.speed -= .002;
-        }
-    }
-
     this.moveSpaceShip = function(){
         if(myGameArea.gameOn){
             myGamePiece.speed += .001;
@@ -438,3 +400,30 @@ function component(width, height, color, x, y, type, side){
 
         }
     }
+
+    component.prototype.offscreen = function(){
+        if(this.x < -this.width || this.x > myGameArea.canvas.width || this.y < 0 || this.y > myGameArea.canvas.height){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    component.prototype.noOutOfBounds = function(){
+        if(this.x < (myGameArea.canvas.width - (myGameArea.canvas.width - myGamePiece.width))){
+            this.x = (myGameArea.canvas.width - (myGameArea.canvas.width - myGamePiece.width));
+            this.speed -= .002;
+        }
+        if(this.x > (myGameArea.canvas.width - myGamePiece.width)){
+            this.x = (myGameArea.canvas.width - myGamePiece.width);
+            this.speed -= .002;
+        }
+        if(this.y > (myGameArea.canvas.height- myGamePiece.height)){
+            this.y = (myGameArea.canvas.height- myGamePiece.height);
+            this.speed -= .002;
+        }
+    }
+
+    component.prototype.scorePosition = 5;
+
+
