@@ -15,13 +15,15 @@ Press up to accelerate to 4000, after this your speed will accelerate at a const
 ### MULTIPLYER
 The maximum multiplyer is 2. You get this when your ship passes the finish line in the middle of the game play area. The farther you are from the middle the lower your multiplyer will be. 
 
-## DOWNLOAD/CLONE THE PROJECT 
-You can download or clone this project here https://github.com/Tomo3030/kesselrun.git
+## PLAYING THE GAME
+you can  play online by following the link: 
+https://tomo3030.github.io/kesselrun/ <br>
+please do this - and try to beat the high score. <br>
 
-## PLAY THE GAME!!
-You can play the game here:
-https://tomo3030.github.io/kesselrun/
-Please do. Try to beat the high score. 
+You can also download or clone this project here: https://github.com/Tomo3030/kesselrun.git by pressing the clone or downlown button. Once you have the project you can open it by opening the index.html file. 
+
+
+
 
 
 
