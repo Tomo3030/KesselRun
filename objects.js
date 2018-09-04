@@ -265,7 +265,6 @@ function component(width, height, color, x, y, type, side){
     this.speed = 0;
     this.particles = [];
     this.side = side;
-    //this.scorePosition = 5;
 
 
     this.update = function(alpha){
@@ -340,8 +339,8 @@ component.prototype.noOutOfBounds = function(){
         this.x = (myGameArea.canvas.width - (myGameArea.canvas.width));
         this.speed -= .002;
     }
-    if(this.x > (myGameArea.canvas.width + myGamePiece.width/2)){
-        this.x = (myGameArea.canvas.width + myGamePiece.width/2         );
+    if(this.x > (myGameArea.canvas.width)){
+        this.x = (myGameArea.canvas.width);
         this.speed -= .002;
     }
     if(this.y > (myGameArea.canvas.height- myGamePiece.height)){
